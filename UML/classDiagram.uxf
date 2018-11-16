@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="13.3">
+  <zoom_level>11</zoom_level>
+  <element>
+    <type>com.baselet.element.old.element.Class</type>
+    <coordinates>
+      <x>561</x>
+      <y>143</y>
+      <w>198</w>
+      <h>242</h>
+    </coordinates>
+    <panel_attributes>Package::model
+Isotope
+--
+-id: String
+-halfLifeInS: long
+-stable: boolean
+-nextIsotope: Isotope
+--
++Isotope(id: String,
+    halftTimeInS: long, 
+    stable: boolean, 
+    nextIsotope: Isotope)
+ +Isotope(id: String 
+    stable: boolean)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Class</type>
+    <coordinates>
+      <x>572</x>
+      <y>495</y>
+      <w>462</w>
+      <h>242</h>
+    </coordinates>
+    <panel_attributes>Package::model
+IsotopeManager
+--
+-allIsotops: set&lt;Isotope&gt;
+--
+-findIsotpeById(id: String)
+-calculateIstopesGraph(
+     startIsotope: map&lt;Isotope, Long&gt;,
+     time: double
+  ):map&lt;map, double&gt;
+--
+Responsibilities
+- Managed die Berechungen der Isotope (Welche Zeitabstände...)
+- Managed das Set aller Isotope
+  (Suche nach Isotope nach Namen...)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Package</type>
+    <coordinates>
+      <x>517</x>
+      <y>55</y>
+      <w>1100</w>
+      <h>726</h>
+    </coordinates>
+    <panel_attributes>RadioactiveDecay</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Package</type>
+    <coordinates>
+      <x>539</x>
+      <y>99</y>
+      <w>594</w>
+      <h>649</h>
+    </coordinates>
+    <panel_attributes>model</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Package</type>
+    <coordinates>
+      <x>1177</x>
+      <y>121</y>
+      <w>407</w>
+      <h>275</h>
+    </coordinates>
+    <panel_attributes>controller</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Class</type>
+    <coordinates>
+      <x>1199</x>
+      <y>165</y>
+      <w>352</w>
+      <h>198</h>
+    </coordinates>
+    <panel_attributes>Package::controller
+ViewController
+--
+-isotopeIdField: TextField
+-amountField: TextField
+-graph: LineChart
+--
++handleButtonQuit:void
++hanldeButtonCalculate: void
+--
+Responsibilities
+- soll nach der Kalkulation der 
+  Isotope Mengen zu allen Zeitpunkten darstellen</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Class</type>
+    <coordinates>
+      <x>803</x>
+      <y>341</y>
+      <w>308</w>
+      <h>132</h>
+    </coordinates>
+    <panel_attributes>Package::model
+JsonReader
+--
+--
+-readJson():set&lt;Isotope&gt;
+--
+Responsibilities
+- Liest das JsonFile aus und formt
+  daraus Isotop-Objekte</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Relation</type>
+    <coordinates>
+      <x>616</x>
+      <y>352</y>
+      <w>54</w>
+      <h>164</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=0..n
+m2=1
+</panel_attributes>
+    <additional_attributes>33;33;33;143</additional_attributes>
+  </element>
+  <element>
+    <type>com.baselet.element.old.element.Class</type>
+    <coordinates>
+      <x>803</x>
+      <y>143</y>
+      <w>308</w>
+      <h>165</h>
+    </coordinates>
+    <panel_attributes>Package::model
+IsotopeCalculator
+--
+--
++calculateIstopeAfterT(
+     startIsotope: map&lt;Isotope, Long&gt;,
+     time: double
+   ): map&lt;Isotope, Long&gt;
+--
+Responsibilities
+- Berechnet Isotop-Zerfall nach t Zeit</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>
