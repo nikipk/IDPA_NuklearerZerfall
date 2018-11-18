@@ -5,14 +5,13 @@ package com.amapolis.RadioactiveDecay.model.isotope;
  */
 public abstract class Isotope {
     private String id;
-    private int atomicNumber;
-    private double atomicMassInU;
+    private int atomicNumber, atomicMass;
     private DecayType decayType;
 
-    public Isotope(String id, int atomicNumber, double atomicMassInU, DecayType decayType) {
+    public Isotope(String id, int atomicNumber, int atomicMass, DecayType decayType) {
         this.id = id;
         this.atomicNumber = atomicNumber;
-        this.atomicMassInU = atomicMassInU;
+        this.atomicMass = atomicMass;
         this.decayType = decayType;
     }
 
@@ -20,8 +19,8 @@ public abstract class Isotope {
         return id;
     }
 
-    public double getAtomicMassInU() {
-        return atomicMassInU;
+    public int getAtomicMass() {
+        return atomicMass;
     }
 
     public int getAtomicNumber() {

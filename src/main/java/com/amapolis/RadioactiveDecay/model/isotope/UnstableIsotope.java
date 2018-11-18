@@ -5,11 +5,28 @@ package com.amapolis.RadioactiveDecay.model.isotope;
  */
 public class UnstableIsotope extends Isotope {
     private double halfTimeInS;
-    private Isotope followingIsotope;
+    private Isotope emergingIsotope;
 
-    public UnstableIsotope(String id, int atomicNumber, double atomicMassInU, DecayType decayType, double halfTimeInS, Isotope followingIsotope) {
-        super(id, atomicNumber, atomicMassInU, decayType);
+    /**
+     * Constructor
+     * @param id (ex: "Ga75")
+     * @param atomicNumber (ex: 31)
+     * @param atomicMass (ex. 44)
+     * @param decayType (ex. DecayType.BETA_MINUS)
+     * @param halfTimeInS (ex 126)
+     * @param emergingIsotope (ex Ge75)
+     */
+    public UnstableIsotope(String id, int atomicNumber, int atomicMass, DecayType decayType, double halfTimeInS, Isotope emergingIsotope) {
+        super(id, atomicNumber, atomicMass, decayType);
         this.halfTimeInS = halfTimeInS;
-        this.followingIsotope = followingIsotope;
+        this.emergingIsotope = emergingIsotope;
+    }
+
+    public double getHalfTimeInS() {
+        return halfTimeInS;
+    }
+
+    public Isotope getEmergingIsotope() {
+        return emergingIsotope;
     }
 }
