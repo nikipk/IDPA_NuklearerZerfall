@@ -4,10 +4,11 @@ package com.amapolis.RadioactiveDecay.model.isotope;
  * Class for unstable isotopes. Contains some more information.
  */
 public class UnstableIsotope extends Isotope {
-    private double halfTimeInS;
+    private double halfTimeInS, decayFactor;
     private Isotope emergingIsotope;
 
     /**
+     *
      * Constructor
      * @param id (ex: "Ga75")
      * @param atomicNumber (ex: 31)
@@ -19,8 +20,10 @@ public class UnstableIsotope extends Isotope {
     public UnstableIsotope(String id, int atomicNumber, int atomicMass, DecayType decayType, double halfTimeInS, Isotope emergingIsotope) {
         super(id, atomicNumber, atomicMass, decayType);
         this.halfTimeInS = halfTimeInS;
+        this.decayFactor = Math.pow(0.5, 1/halfTimeInS);
         this.emergingIsotope = emergingIsotope;
     }
+
 
     public double getHalfTimeInS() {
         return halfTimeInS;
@@ -28,5 +31,9 @@ public class UnstableIsotope extends Isotope {
 
     public Isotope getEmergingIsotope() {
         return emergingIsotope;
+    }
+
+    public double getDecayFactor() {
+        return decayFactor;
     }
 }
