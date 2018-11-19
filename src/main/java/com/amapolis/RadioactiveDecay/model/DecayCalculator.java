@@ -5,8 +5,11 @@ import com.amapolis.RadioactiveDecay.model.isotope.*;
 
 import java.util.*;
 
+/**
+ * This Class
+ */
 public class DecayCalculator {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InvalidIsotopeException {
         StableIsotope as75 = new StableIsotope("As75", 23452, 2332, DecayType.STABLE);
         UnstableIsotope ge75 = new UnstableIsotope("Ge75", 23452, 2332, DecayType.BETA_MINUS, 4966.8, as75);
         UnstableIsotope ga75 = new UnstableIsotope("Ga75", 23452, 2332, DecayType.BETA_MINUS, 126, ge75);
@@ -14,12 +17,12 @@ public class DecayCalculator {
         try {
             Map<Isotope, Double> test = null;
             long timeStart = System.currentTimeMillis();
-            for(int i = 0; i < 1000000; i++) {
+            for (int i = 0; i < 1000000; i++) {
                 test = getIsotopeAtTimeExact(ga75, 1000000, 170);
             }
             long timeStop = System.currentTimeMillis();
             System.out.println("Used Time: " + (timeStop - timeStart) + "ms");
-            for(Isotope i:test.keySet()){
+            for (Isotope i : test.keySet()) {
                 System.out.println(i.getId() + ": " + test.get(i));
             }
         } catch (InvalidIsotopeException e) {
@@ -31,6 +34,7 @@ public class DecayCalculator {
     /**
      * Maps are in fact slower than Container classes in most cases, but not by far. Maps though have a a lot faster containsKey function which we might need if want multiple initial isotopes.
      * For performance tests please refer to the performance test in the test project.
+     *
      * @param initialIsotope
      * @param amountIsotope
      * @param time
@@ -78,7 +82,7 @@ public class DecayCalculator {
         //LinkedHashMap is faster than HashMap
         Map<Isotope, Double> returnIsotopes = new LinkedHashMap<Isotope, Double>();
 
-        if(initialIsotope.getDecayType().isStable()){
+        if (initialIsotope.getDecayType().isStable()) {
             returnIsotopes.put(initialIsotope, amountIsotope);
             return returnIsotopes;
         } else {
@@ -86,17 +90,39 @@ public class DecayCalculator {
             UnstableIsotope unstableIsotope;
             try {
                 unstableIsotope = (UnstableIsotope) initialIsotope;
-            } catch (ClassCastException e){
+            } catch (ClassCastException e) {
                 throw new InvalidIsotopeException();
             }
 
             double amountAfterTime = amountIsotope * Math.pow(unstableIsotope.getDecayFactor(), time);
-
             returnIsotopes.put(unstableIsotope, amountAfterTime);
 
             //Rekursiv für weitere Isotope
             returnIsotopes.putAll(getIsotopeAtTimeExact(unstableIsotope.getEmergingIsotope(), amountIsotope - amountAfterTime, time));
             return returnIsotopes;
+        }
+    }
+
+    /**
+     * Get all emerging isotopes that will result from the initial isotope.
+     *
+     * @param initialIsotope
+     * @return
+     */
+    public static Set<Isotope> getAllEmergingIsotopes(Isotope initialIsotope) throws InvalidIsotopeException {
+        Set<Isotope> returnIsotopes = new LinkedHashSet<Isotope>();
+
+        returnIsotopes.add(initialIsotope);
+
+        if (initialIsotope.getDecayType().isStable()) {
+            return returnIsotopes;
+        } else {
+            try {
+                returnIsotopes.addAll(getAllEmergingIsotopes(((UnstableIsotope) initialIsotope).getEmergingIsotope()));
+                return returnIsotopes;
+            } catch (ClassCastException e) {
+                throw new InvalidIsotopeException();
+            }
         }
     }
 }
