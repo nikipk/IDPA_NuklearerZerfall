@@ -10,20 +10,19 @@ import java.util.stream.Collectors;
 /**
  * This Class calculates the radioactive decay
  */
-public class ExactDecayCalculator {
+public class DecayCalculator {
     //Defines what is considered nothing (lower more precise but slower)
     private double zeroTolerance;
     private IsotopeProgressListener isotopeProgressListener;
 
     public static void main(String[] args) throws InvalidIsotopeException {
-        ExactDecayCalculator exactDecayCalculator = new ExactDecayCalculator();
-        exactDecayCalculator.setIsotopeProgressListener((progressInPercent, time, isotopes) -> {
-            /*System.out.println("time: " + time);
-            System.out.println("progress: " + progressInPercent);
+        DecayCalculator decayCalculator = new DecayCalculator();
+        decayCalculator.setIsotopeProgressListener((time, isotopes) -> {
+            System.out.println("time: " + time);
             for(Isotope i:isotopes.keySet()){
                 System.out.println("\t" + i.getId() + ": " + isotopes.get(i));
             }
-            System.out.println("\n");*/
+            System.out.println("\n");
         });
 
         StableIsotope as75 = new StableIsotope("As75", 23452, 2332, DecayType.STABLE);
@@ -33,11 +32,12 @@ public class ExactDecayCalculator {
         Map<Isotope, Double> testData = new HashMap<Isotope, Double>();
         testData.put(ga75, 10.0);
         testData.put(ge75, 10.0);
+        testData.put(as75, 10.0);
 
         //Map<Isotope, Double> test = getIsotopesAtTimeExact(170, testData, getAllOccurringIsotopes(testData.keySet()));
 
         long timeStart = System.currentTimeMillis();
-        Map<Double, Map<Isotope, Double>> testTimeLine = exactDecayCalculator.getIsotopeTimeLineExact(1000000, testData);
+        Map<Double, Map<Isotope, Double>> testTimeLine = decayCalculator.getIsotopeTimeLineExact(10, testData);
         long timeStop = System.currentTimeMillis();
 
         /*
@@ -70,7 +70,7 @@ public class ExactDecayCalculator {
         }*/
     }
 
-    public ExactDecayCalculator() {
+    public DecayCalculator() {
         //default values
         zeroTolerance = 0.5;
     }
@@ -203,7 +203,7 @@ public class ExactDecayCalculator {
      * @return
      */
     public Set<Isotope> getAllOccurringIsotopes(Collection<Isotope> initialIsotopes) throws InvalidIsotopeException {
-        Set<Isotope> allOccurringIsotopes = new LinkedHashSet<Isotope>();
+        Set<Isotope> allOccurringIsotopes = new LinkedHashSet<>();
         //Set ignores add command if the isotope is already in the set
         for (Isotope i : initialIsotopes) {
             allOccurringIsotopes.addAll(getAllOccurringIsotopes(i));
@@ -226,11 +226,13 @@ public class ExactDecayCalculator {
         //todo can maybe be shortend
         Set<Isotope> allOccurringIsotopes = getAllOccurringIsotopes(initialIsotopes.keySet());
         UnstableIsotope longestDecayingIsotope = findLongestDecayingIsotope(allOccurringIsotopes);
-        //calculate until "nothing" is left for progress //todo maybe remove -> remove progressInPercent from interface
-        double timeUntilNothingLeft = timeUntilNothingLeft(longestDecayingIsotope);
+        //calculate until "nothing" is left for progress
         //if all isotopes are stable
         if (longestDecayingIsotope == null) {
             timeLine.put(0.0, initialIsotopes);
+            if(isotopeProgressListener != null){
+                isotopeProgressListener.onProgress(0.0, initialIsotopes);
+            }
             return timeLine;
         } else {
             double time = 0;
@@ -241,7 +243,7 @@ public class ExactDecayCalculator {
                 timeLine.put(time, tmpIsotopes);
                 //update progress
                 if(isotopeProgressListener != null){
-                    isotopeProgressListener.onProgress((int) Math.round(100/timeUntilNothingLeft*time), time, tmpIsotopes);
+                    isotopeProgressListener.onProgress(time, tmpIsotopes);
                 }
                 UnstableIsotope fastestDecayingIsotope = findFastestDecayingIsotopeOverToleranceValue(tmpIsotopes);
                 if(fastestDecayingIsotope != null) {
