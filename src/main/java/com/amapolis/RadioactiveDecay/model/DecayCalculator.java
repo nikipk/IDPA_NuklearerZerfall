@@ -18,11 +18,11 @@ public class DecayCalculator {
     public static void main(String[] args) throws InvalidIsotopeException {
         DecayCalculator decayCalculator = new DecayCalculator();
         decayCalculator.setIsotopeProgressListener((time, isotopes) -> {
-            System.out.println("time: " + time);
+            /*System.out.println("time: " + time);
             for(Isotope i:isotopes.keySet()){
                 System.out.println("\t" + i.getId() + ": " + isotopes.get(i));
             }
-            System.out.println("\n");
+            System.out.println("\n");*/
         });
 
         StableIsotope as75 = new StableIsotope("As75", 23452, 2332, DecayType.STABLE);
@@ -31,52 +31,56 @@ public class DecayCalculator {
 
         Map<Isotope, Double> testData = new HashMap<Isotope, Double>();
         testData.put(ga75, 10.0);
-        testData.put(ge75, 10.0);
-        testData.put(as75, 10.0);
+        //testData.put(ge75, 10.0);
+        //testData.put(as75, 10.0);
 
         //Map<Isotope, Double> test = getIsotopesAtTimeExact(170, testData, getAllOccurringIsotopes(testData.keySet()));
 
         long timeStart = System.currentTimeMillis();
-        Map<Double, Map<Isotope, Double>> testTimeLine = decayCalculator.getIsotopeTimeLineExact(10, testData);
+        Map<Double, Map<Isotope, Double>> testTimeLineApp = decayCalculator.getIsotopeTimeLineApproach(3, testData);
         long timeStop = System.currentTimeMillis();
-
-        /*
-        for(double d:testTimeLine.keySet()) {
-            Map<Isotope, Double> test = testTimeLine.get(d);
-            System.out.println("time: " + d);
-            for (Isotope i : test.keySet()) {
-                System.out.println("\t" + i.getId() + ": " + test.get(i));
+        System.out.println("Used time for calculating approach: " + (timeStop - timeStart) + "ms");
+        for(Double d:testTimeLineApp.keySet()) {
+            System.out.println("Time: " + d);
+            for (Isotope i : testTimeLineApp.get(d).keySet()) {
+                System.out.println("\t" + i.getId() + " " + testTimeLineApp.get(d).get(i));
             }
-            System.out.println("\n");
+            System.out.println();
+        }
+        System.out.println("\n");
+
+        timeStart = System.currentTimeMillis();
+
+        /*Map<Isotope, Double> test2 = null;
+        for (int i = 0; i < 10000000; i++) {
+            test2 = decayCalculator.getIsotopesAtTimeExact(ga75, 100000, 126);
         }*/
+        Map<Double, Map<Isotope, Double>> testTimeLineEx = decayCalculator.getIsotopeTimeLineExact(3, testData);
 
-        System.out.println("Used time for calculating: " + (timeStop - timeStart) + "ms");
-
-
-        /*
-        try {
-            Map<Isotope, Double> test = null;
-            long timeStart = System.currentTimeMillis();
-            for (int i = 0; i < 1000000; i++) {
-                test = getIsotopesAtTimeExact(ga75, 1000000, 170);
+        timeStop = System.currentTimeMillis();
+        System.out.println("Used time for calculating exact: " + (timeStop - timeStart) + "ms");
+        for(Double d:testTimeLineEx.keySet()) {
+            System.out.println("Time: " + d);
+            for (Isotope i : testTimeLineEx.get(d).keySet()) {
+                System.out.println("\t" + i.getId() + " " + testTimeLineEx.get(d).get(i));
             }
-            long timeStop = System.currentTimeMillis();
-            System.out.println("Used Time: " + (timeStop - timeStart) + "ms");
-            for (Isotope i : test.keySet()) {
-                System.out.println(i.getId() + ": " + test.get(i));
-            }
-        } catch (InvalidIsotopeException e) {
-            e.printStackTrace();
-        }*/
+            System.out.println();
+        }
+
+
+        //System.out.println("Steps: " + testTimeLine.size());
+
     }
 
     public DecayCalculator() {
         //default values
         zeroTolerance = 0.5;
+        isotopeProgressListener = (time, isotopes) -> {
+        };
     }
 
     /**
-     * This Method calculates the radioactive decay and the resulting Isotopes of one Isotope
+     * This Method calculates the radioactive decay and the resulting Isotopes of a single Isotope
      *
      * @param initialIsotope
      * @param amountIsotope
@@ -149,17 +153,75 @@ public class DecayCalculator {
     /**
      * This Method calculates the radioactive decay and the resulting Isotopes of multiple Isotopes
      *
-     * @param time
      * @param initialIsotopes
+     * @param time
      * @param allOccurringIsotopes
      * @return
      * @throws InvalidIsotopeException
      */
-    public Map<Isotope, Double> getIsotopesAtTimeExact(double time, Map<Isotope, Double> initialIsotopes, Set<Isotope> allOccurringIsotopes) throws InvalidIsotopeException {
+    public Map<Isotope, Double> getIsotopesAtTimeExact(Map<Isotope, Double> initialIsotopes, double time, Set<Isotope> allOccurringIsotopes) throws InvalidIsotopeException {
         Map<Isotope, Double> returnIsotopes = allOccurringIsotopes.stream().collect(Collectors.toMap(Function.identity(), p -> 0.0));
 
         for (Isotope initialIsotope : initialIsotopes.keySet()) {
             Map<Isotope, Double> tmpIsotopes = getIsotopesAtTimeExact(initialIsotope, initialIsotopes.get(initialIsotope), time);
+
+            for (Isotope i : tmpIsotopes.keySet()) {
+                //add values
+                double newAmount = returnIsotopes.get(i) + tmpIsotopes.get(i);
+                returnIsotopes.put(i, newAmount);
+            }
+        }
+
+        return returnIsotopes;
+    }
+
+    /**
+     * This Method calculates the approaching radioactive decay and the resulting Isotopes of a single Isotope
+     *
+     * @param initialIsotope
+     * @param amountIsotope
+     * @param timeLastStep
+     * @param timeCurrently
+     * @return
+     * @throws InvalidIsotopeException
+     */
+    public Map<Isotope, Double> getIsotopesAtTimeApproach(Isotope initialIsotope, double amountIsotope, double timeLastStep, double timeCurrently) throws InvalidIsotopeException {
+        //todo does not work
+        Map<Isotope, Double> returnIsotopes = new LinkedHashMap<Isotope, Double>();
+
+        if (initialIsotope.getDecayType().isStable()) {
+            returnIsotopes.put(initialIsotope, amountIsotope);
+            return returnIsotopes;
+        } else {
+            UnstableIsotope unstableIsotope;
+            try {
+                unstableIsotope = (UnstableIsotope) initialIsotope;
+            } catch (ClassCastException e) {
+                throw new InvalidIsotopeException();
+            }
+            double amountAfterTime = amountIsotope - (amountIsotope * unstableIsotope.getApproachValue() * (timeCurrently - timeLastStep));
+            returnIsotopes.put(initialIsotope, amountAfterTime);
+
+            returnIsotopes.putAll(getIsotopesAtTimeApproach(unstableIsotope.getEmergingIsotope(), amountIsotope - amountAfterTime, timeLastStep, timeCurrently));
+            return returnIsotopes;
+        }
+    }
+
+    /**
+     * This Method calculates the approaching radioactive decay and the resulting Isotopes of multiple Isotopes
+     *
+     * @param initialIsotopes
+     * @param timeLastStep
+     * @param timeCurrently
+     * @param allOccurringIsotopes
+     * @return
+     * @throws InvalidIsotopeException
+     */
+    public Map<Isotope, Double> getIsotopesAtTimeApproach(Map<Isotope, Double> initialIsotopes, double timeLastStep, double timeCurrently, Set<Isotope> allOccurringIsotopes) throws InvalidIsotopeException {
+        Map<Isotope, Double> returnIsotopes = allOccurringIsotopes.stream().collect(Collectors.toMap(Function.identity(), p -> 0.0));
+
+        for (Isotope initialIsotope : initialIsotopes.keySet()) {
+            Map<Isotope, Double> tmpIsotopes = getIsotopesAtTimeApproach(initialIsotope, initialIsotopes.get(initialIsotope), timeLastStep, timeCurrently);
 
             for (Isotope i : tmpIsotopes.keySet()) {
                 //add values
@@ -214,7 +276,8 @@ public class DecayCalculator {
 
     /**
      * This method create a timeline of the isotope decay.
-     * @param precisionLevel (fraction of halftime => higher more precise, lower faster)
+     *
+     * @param precisionLevel  (fraction of halftime => higher more precise, lower faster)
      * @param initialIsotopes
      * @return timeLine
      * @throws InvalidIsotopeException
@@ -230,23 +293,66 @@ public class DecayCalculator {
         //if all isotopes are stable
         if (longestDecayingIsotope == null) {
             timeLine.put(0.0, initialIsotopes);
-            if(isotopeProgressListener != null){
-                isotopeProgressListener.onProgress(0.0, initialIsotopes);
-            }
+            isotopeProgressListener.onProgress(0.0, initialIsotopes);
             return timeLine;
         } else {
             double time = 0;
             boolean calculating = true;
             //until nothing is left / everything stable
             while (calculating) {
-                Map<Isotope, Double> tmpIsotopes = getIsotopesAtTimeExact(time, initialIsotopes, allOccurringIsotopes);
+                Map<Isotope, Double> tmpIsotopes = getIsotopesAtTimeExact(initialIsotopes, time, allOccurringIsotopes);
                 timeLine.put(time, tmpIsotopes);
                 //update progress
-                if(isotopeProgressListener != null){
-                    isotopeProgressListener.onProgress(time, tmpIsotopes);
-                }
+                isotopeProgressListener.onProgress(time, tmpIsotopes);
+
                 UnstableIsotope fastestDecayingIsotope = findFastestDecayingIsotopeOverToleranceValue(tmpIsotopes);
-                if(fastestDecayingIsotope != null) {
+                if (fastestDecayingIsotope != null) {
+                    time = time + (fastestDecayingIsotope.getHalfTimeInS() / precisionLevel);
+                } else {
+                    calculating = false;
+                }
+            }
+        }
+
+        return timeLine;
+    }
+
+    /**
+     * This method create a timeline of the isotope decay.
+     *
+     * @param precisionLevel  (fraction of halftime => higher more precise, lower faster)
+     * @param initialIsotopes
+     * @return timeLine
+     * @throws InvalidIsotopeException
+     */
+    public Map<Double, Map<Isotope, Double>> getIsotopeTimeLineApproach(double precisionLevel, Map<Isotope, Double> initialIsotopes) throws InvalidIsotopeException {
+        Map<Double, Map<Isotope, Double>> timeLine = new LinkedHashMap<>();
+
+        //find Isotope with longest decay time
+        //todo can maybe be shortend
+        Set<Isotope> allOccurringIsotopes = getAllOccurringIsotopes(initialIsotopes.keySet());
+        UnstableIsotope longestDecayingIsotope = findLongestDecayingIsotope(allOccurringIsotopes);
+        //calculate until "nothing" is left for progress
+        //if all isotopes are stable
+        if (longestDecayingIsotope == null) {
+            timeLine.put(0.0, initialIsotopes);
+            isotopeProgressListener.onProgress(0.0, initialIsotopes);
+            return timeLine;
+        } else {
+            double timeLastStep = 0;
+            double time = 0;
+            boolean calculating = true;
+            //until nothing is left / everything stable
+            while (calculating) {
+                Map<Isotope, Double> tmpIsotopes = getIsotopesAtTimeApproach(initialIsotopes, timeLastStep, time, allOccurringIsotopes);
+                timeLine.put(time, tmpIsotopes);
+                //update progress
+                isotopeProgressListener.onProgress(time, tmpIsotopes);
+
+                timeLastStep = time;
+
+                UnstableIsotope fastestDecayingIsotope = findFastestDecayingIsotopeOverToleranceValue(tmpIsotopes);
+                if (fastestDecayingIsotope != null) {
                     time = time + (fastestDecayingIsotope.getHalfTimeInS() / precisionLevel);
                 } else {
                     calculating = false;
