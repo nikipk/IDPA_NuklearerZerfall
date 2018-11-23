@@ -18,18 +18,19 @@ public class MainApp extends Application {
 
     public void start(Stage stage) throws Exception {
 
-        log.info("Starting Hello JavaFX and Maven demonstration application");
+        log.info("Starting radioactive decay calculator");
 
-        String fxmlFile = "/fxml/hello.fxml";
+        String fxmlFile = "/fxml/MainWindow.fxml";
         log.debug("Loading FXML for main view from: {}", fxmlFile);
         FXMLLoader loader = new FXMLLoader();
         Parent rootNode = (Parent) loader.load(getClass().getResourceAsStream(fxmlFile));
 
         log.debug("Showing JFX scene");
-        Scene scene = new Scene(rootNode, 400, 200);
-        scene.getStylesheets().add("/styles/styles.css");
+        Scene scene = new Scene(rootNode);
+        //scene.getStylesheets().add("/styles/styles.css");
+        //todo set Icon
 
-        stage.setTitle("Hello JavaFX and Maven");
+        stage.setTitle("Radioactive decay calculator");
         stage.setScene(scene);
         stage.show();
     }
