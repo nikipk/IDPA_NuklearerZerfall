@@ -16,6 +16,7 @@ public class DecayCalculator {
     private double zeroTolerance;
     private IsotopeProgressListener isotopeProgressListener;
 
+    //todo remove
     public static void main(String[] args) throws InvalidIsotopeException, NegativeIsotopeAmountInApproachCalculationException {
         DecayCalculator decayCalculator = new DecayCalculator();
         decayCalculator.setIsotopeProgressListener((time, isotopes) -> {
