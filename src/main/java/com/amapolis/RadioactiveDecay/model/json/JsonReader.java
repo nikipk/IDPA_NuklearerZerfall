@@ -84,7 +84,7 @@ public class JsonReader {
     }
 
     public DecayType getDecayTypeFromString(String decayTypeString){
-        return null;
+        return null;//TODO
     }
 
     public double getHalfTimeFromString(String halfTimeString){
