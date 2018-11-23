@@ -23,12 +23,12 @@
       </Text>
    </top>
    <bottom>
-      <LineChart BorderPane.alignment="CENTER">
+      <LineChart fx:id="lineChart" title="Isotope decay" BorderPane.alignment="CENTER">
         <xAxis>
-          <CategoryAxis side="BOTTOM" />
+          <CategoryAxis fx:id="yAxis" label="Time in seconds" side="BOTTOM" />
         </xAxis>
         <yAxis>
-          <NumberAxis side="LEFT" />
+          <NumberAxis label="Amount istopes" side="LEFT" fx:id="xAxis" />
         </yAxis>
       </LineChart>
    </bottom>
@@ -79,7 +79,7 @@
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                      </HBox.margin>
                   </Button>
-                  <Button mnemonicParsing="false" text="Clear graph">
+                  <Button mnemonicParsing="false" onAction="#handleButtonClearGraph" text="Clear graph">
                      <HBox.margin>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                      </HBox.margin>

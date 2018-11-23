@@ -3,54 +3,78 @@ package com.amapolis.RadioactiveDecay.controller;
 import com.amapolis.RadioactiveDecay.MainApp;
 import com.amapolis.RadioactiveDecay.model.isotope.DecayType;
 import com.amapolis.RadioactiveDecay.model.isotope.Isotope;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.chart.Axis;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.event.ActionEvent;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class MainWindowController {
+
+public class MainWindowController implements Initializable {
     private static final Logger log = LoggerFactory.getLogger(MainWindowController.class);
 
     @FXML
-    TableView<Isotope> isotopeTable;
+    private TableView<Isotope> isotopeTable;
 
     @FXML
-    TableColumn<Isotope, String> idCol, elementNameCol, colorCol;
+    private TableColumn<Isotope, String> idCol, elementNameCol, colorCol;
 
     @FXML
-    TableColumn<Isotope, Integer> electronsProtonsCol, neutronsCol, massCol;
+    private TableColumn<Isotope, Integer> electronsProtonsCol, neutronsCol, massCol;
 
     @FXML
-    TableColumn<Isotope, Double> amountCol;
+    private TableColumn<Isotope, Double> amountCol;
 
     @FXML
-    TableColumn<Isotope, DecayType> decayTypeCol;
+    private TableColumn<Isotope, DecayType> decayTypeCol;
 
     @FXML
-    public void handleButtonAdd(ActionEvent ae){
+    private LineChart<Number, Number> lineChart;
+
+    @FXML
+    private Axis<Number> xAxis, yAxis;
+
+    @FXML
+    private void handleButtonAdd(ActionEvent ae){
         log.info("Add button clicked!");
     }
 
     @FXML
-    public void handleButtonDelete(ActionEvent ae){
+    private void handleButtonDelete(ActionEvent ae){
         log.info("Delete button clicked!");
     }
 
     @FXML
-    public void handleButtonCalculateExact(ActionEvent ae){
+    private void handleButtonCalculateExact(ActionEvent ae){
         log.info("CalculateExact button clicked!");
+        lineChart = new LineChart<Number, Number>(xAxis, yAxis);
+        XYChart.Series<Number,Number> series = new XYChart.Series<Number,Number>();
+        series.setName("Amount of Isotopes");
+        series.getData().add(new XYChart.Data<Number, Number>(100, 120.0));
+        series.getData().add(new XYChart.Data<Number, Number>(100, 240.0));
+        lineChart.getData().add(series);
     }
 
     @FXML
-    public void handleButtonCalculateApproach(ActionEvent ae){
+    private void handleButtonCalculateApproach(ActionEvent ae){
         log.info("CalculateApproach button clicked!");
     }
 
     @FXML
-    public void handleButtonClearGraph(ActionEvent ae){
+    private void handleButtonClearGraph(ActionEvent ae){
         log.info("ClearGraph button clicked!");
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        log.info("Started MainWindowController");
     }
 }
