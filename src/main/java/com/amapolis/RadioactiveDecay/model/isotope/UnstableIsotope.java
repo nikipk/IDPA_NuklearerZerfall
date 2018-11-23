@@ -22,11 +22,10 @@ public class UnstableIsotope extends Isotope {
 =======
 >>>>>>> 9055062be38681b00fdb8e66f6a6a0856732c947
      */
-    public UnstableIsotope(String id, String elementName, int numberNeutrons, int numberProtons, DecayType decayType, double halfTimeInS, Isotope emergingIsotope) {
+    public UnstableIsotope(String id, String elementName, int numberNeutrons, int numberProtons, DecayType decayType, double halfTimeInS) {
         super(id, elementName, numberNeutrons, numberProtons, decayType);
         this.halfTimeInS = halfTimeInS;
         this.decayFactor = Math.pow(0.5, 1 / halfTimeInS);
-        this.emergingIsotope = emergingIsotope;
         this.approachValue = Math.log(2) / halfTimeInS;
     }
 
@@ -46,4 +45,7 @@ public class UnstableIsotope extends Isotope {
         return approachValue;
     }
 
+    public void setEmergingIsotope(Isotope emergingIsotope) {
+        this.emergingIsotope = emergingIsotope;
+    }
 }
