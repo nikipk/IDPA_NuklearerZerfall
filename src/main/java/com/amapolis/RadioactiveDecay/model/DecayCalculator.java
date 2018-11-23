@@ -14,68 +14,8 @@ import java.util.stream.Collectors;
 public class DecayCalculator {
     //Defines what is considered nothing (lower more precise but slower)
     private double zeroTolerance;
+    //Callback for each time step
     private IsotopeProgressListener isotopeProgressListener;
-
-    //todo remove
-    public static void main(String[] args) throws InvalidIsotopeException, NegativeIsotopeAmountInApproachCalculationException {
-        DecayCalculator decayCalculator = new DecayCalculator();
-        decayCalculator.setIsotopeProgressListener((time, isotopes) -> {
-            /*System.out.println("time: " + time);
-            for(Isotope i:isotopes.keySet()){
-                System.out.println("\t" + i.getId() + ": " + isotopes.get(i));
-            }
-            System.out.println("\n");*/
-        });
-
-        StableIsotope as75 = new StableIsotope("As75", 23452, 2332, DecayType.STABLE);
-        UnstableIsotope ge75 = new UnstableIsotope("Ge75", 23452, 2332, DecayType.BETA_MINUS, 4966.8, as75);
-        UnstableIsotope ga75 = new UnstableIsotope("Ga75", 23452, 2332, DecayType.BETA_MINUS, 126, ge75);
-
-        Map<Isotope, Double> testData = new HashMap<Isotope, Double>();
-        testData.put(ga75, 1000.0);
-        //testData.put(ge75, 10.0);
-        //testData.put(as75, 10.0);
-
-        //Map<Isotope, Double> test = getIsotopesAtTimeExact(170, testData, getAllOccurringIsotopes(testData.keySet()));
-
-        long timeStart = System.currentTimeMillis();
-        Map<Double, Map<Isotope, Double>> testTimeLineApp = decayCalculator.getIsotopeTimeLineApproach(10000, testData);
-        long timeStop = System.currentTimeMillis();
-        System.out.println("Used time for calculating approach: " + (timeStop - timeStart) + "ms");
-        /*
-        for (Double d : testTimeLineApp.keySet()) {
-            System.out.println("Time: " + d);
-            for (Isotope i : testTimeLineApp.get(d).keySet()) {
-                System.out.println("\t" + i.getId() + " " + testTimeLineApp.get(d).get(i));
-            }
-            System.out.println();
-        }*/
-        System.out.println("\n");
-
-        timeStart = System.currentTimeMillis();
-
-        /*
-        Map<Isotope, Double> test2 = null;
-        for (int i = 0; i < 10000000; i++) {
-            test2 = decayCalculator.getIsotopesAtTimeExact(ga75, 100000, 126);
-        }*/
-        Map<Double, Map<Isotope, Double>> testTimeLineEx = decayCalculator.getIsotopeTimeLineExact(10000, testData);
-
-        timeStop = System.currentTimeMillis();
-        System.out.println("Used time for calculating exact: " + (timeStop - timeStart) + "ms");
-        /*
-        for (Double d : testTimeLineEx.keySet()) {
-            System.out.println("Time: " + d);
-            for (Isotope i : testTimeLineEx.get(d).keySet()) {
-                System.out.println("\t" + i.getId() + " " + testTimeLineEx.get(d).get(i));
-            }
-            System.out.println();
-        }*/
-
-
-        //System.out.println("Steps: " + testTimeLine.size());
-
-    }
 
     public DecayCalculator() {
         //default values
