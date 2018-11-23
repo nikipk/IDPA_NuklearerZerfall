@@ -8,11 +8,11 @@ public class StableIsotope extends Isotope {
     /**
      * Constructor
      * @param id (ex. "As75")
-     * @param atomicNumber (ex. 33)
-     * @param atomicMass (ex. 75)
-     * @param decayType (ex. DecayType.STABLE)
+     * @param elementName (ex. Asodium)
+     * @param numberNeutrons (ex. 7)
+     * @param numberProtons (ex. 14)
      */
-    public StableIsotope(String id, int atomicNumber, int atomicMass, DecayType decayType) {
-        super(id, atomicNumber, atomicMass, decayType);
+    public StableIsotope(String id, String elementName, int numberNeutrons, int numberProtons) {
+        super(id, elementName, numberNeutrons, numberProtons, DecayType.STABLE);
     }
 }

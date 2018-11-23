@@ -4,14 +4,16 @@ package com.amapolis.RadioactiveDecay.model.isotope;
  * This Class represents the base information of one Isotope
  */
 public abstract class Isotope {
-    private String id;
-    private int atomicNumber, atomicMass;
+    
+    private String id, elementName;
+    private int numberNeutrons, numberProtons;     
     private DecayType decayType;
 
-    public Isotope(String id, int atomicNumber, int atomicMass, DecayType decayType) {
+    public Isotope(String id, String elementName, int numberNeutrons, int numberProtons, DecayType decayType) {
         this.id = id;
-        this.atomicNumber = atomicNumber;
-        this.atomicMass = atomicMass;
+        this.elementName = elementName;
+        this.numberNeutrons = numberNeutrons;
+        this.numberProtons = numberProtons;
         this.decayType = decayType;
     }
 
@@ -19,15 +21,20 @@ public abstract class Isotope {
         return id;
     }
 
-    public int getAtomicMass() {
-        return atomicMass;
+    public String getElementName() {
+        return elementName;
     }
 
-    public int getAtomicNumber() {
-        return atomicNumber;
+    public int getNumberNeutrons() {
+        return numberNeutrons;
+    }
+
+    public int getNumberProtons() {
+        return numberProtons;
     }
 
     public DecayType getDecayType() {
         return decayType;
     }
+ 
 }
