@@ -3,6 +3,7 @@ package com.amapolis.RadioactiveDecay.model.utils;
 import java.util.Random;
 
 public class RandomColor {
+    //todo not used currently => remove
     //Random as attribute because we don't want to create a new object every time we call the getRandomHexColor method
     private static Random random = new Random();
 

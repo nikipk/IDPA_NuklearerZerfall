@@ -8,7 +8,7 @@ import javafx.scene.paint.Color;
  */
 public abstract class Isotope {
     
-    private String id, elementName, colorCode;
+    private String id, elementName;
     private int numberNeutrons, numberProtons;     
     private DecayType decayType;
 
@@ -18,8 +18,6 @@ public abstract class Isotope {
         this.numberNeutrons = numberNeutrons;
         this.numberProtons = numberProtons;
         this.decayType = decayType;
-        //default random value
-        this.colorCode = RandomColor.getRandomHexColor();
     }
 
     public String getId() {
@@ -38,15 +36,11 @@ public abstract class Isotope {
         return numberProtons;
     }
 
+    public int getAtomicMass(){
+        return numberNeutrons + numberProtons;
+    }
+
     public DecayType getDecayType() {
         return decayType;
-    }
-
-    public String getColorCode() {
-        return colorCode;
-    }
-
-    public void setColorCode(String colorCode) {
-        this.colorCode = colorCode;
     }
 }
