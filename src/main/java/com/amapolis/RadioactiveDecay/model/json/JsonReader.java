@@ -11,6 +11,8 @@ import com.amapolis.RadioactiveDecay.model.isotope.Isotope;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -29,19 +31,22 @@ import org.json.simple.parser.ParseException;
  */
 public class JsonReader {
 
-    Set<Isotope> simpleIsotopeList;
-    Set<Isotope> isotopeList;
+    private Set<Isotope> simpleIsotopeList;
+    private Set<Isotope> isotopeList;
+    private Set<String> idList;
+    private Set<String> elementNameList;
 
     public JsonReader() {
         simpleIsotopeList = new HashSet<>();
         isotopeList = new HashSet<>();
+        idList = new HashSet<>();
+        elementNameList = new HashSet<>();
     }
 
     public void scannJson() {
         JSONParser parser = new JSONParser();
-
         try {
-            Object rootObject = parser.parse(new FileReader("D:\\IDPA_NuclearDecay\\IDPA_RadioactiveDecay\\src\\main\\resources\\json\\isotopes.json"));
+            Object rootObject = parser.parse(new FileReader("../IDPA_RadioactiveDecay/src/main/resources/json/isotopes.json"));
             JSONObject root = (JSONObject) rootObject;
 
             JSONArray isotopeArray = (JSONArray) root.get("nucs");
@@ -49,7 +54,12 @@ public class JsonReader {
             JSONArray shortNameArray = (JSONArray) root.get("elements");
             JSONArray decayArray = (JSONArray) root.get("decays");
 
-            for(int i = 0;i < isotopeArray.size();i++) {
+            for (int i = 0; i < shortNameArray.size(); i++) {
+                idList.add((String) shortNameArray.get(i));
+                elementNameList.add((String) nameArray.get(i));
+            }
+
+            for (int i = 0; i < isotopeArray.size(); i++) {
                 JSONObject isotopeObject = (JSONObject) isotopeArray.get(i);
                 if (isotopeObject.containsKey("h")) {
                     int numberNeurons = Integer.parseInt((String) isotopeObject.get("n"));
@@ -58,18 +68,18 @@ public class JsonReader {
                     String elementName = (String) nameArray.get(numberProtons);
                     if (((String) isotopeObject.get("h")).equals("stable")) {
                         simpleIsotopeList.add(new StableIsotope(id, elementName, numberNeurons, numberProtons));
-                        //System.out.println(id+", "+elementName+", "+numberNeurons+", "+numberProtons);
+                        //System.out.println("STABLE, "+id+", "+elementName+", "+numberNeurons+", "+numberProtons);
                     } else {
-                        if(isotopeObject.containsKey("dm")) {
+                        if (isotopeObject.containsKey("dm")) {
                             JSONArray isotopeDecayArray = (JSONArray) isotopeObject.get("dm");
                             JSONObject isotopeDecayType = (JSONObject) isotopeDecayArray.get(0);
                             int decayNumber = Integer.parseInt((String) isotopeDecayType.get("a"));
                             if (!(decayNumber >= 59)) {
                                 String decayTypeString = (String) decayArray.get(decayNumber);
-                                String halfTimeString = (String) isotopeObject.get("h");
-                                simpleIsotopeList.add(new UnstableIsotope(id, elementName, numberNeurons, numberProtons, getDecayTypeFromString(decayTypeString), getHalfTimeFromString(halfTimeString)));
-                                if(halfTimeString.contains("eV")){
-                                    System.out.println(id + ", " + elementName + ", " + numberNeurons + ", " + numberProtons+ ", " +decayTypeString+ ", "+halfTimeString);
+                                if (isValidDecayType(decayTypeString)) {
+                                    String halfTimeString = (String) isotopeObject.get("h");
+                                    simpleIsotopeList.add(new UnstableIsotope(id, elementName, numberNeurons, numberProtons, getDecayTypeFromString(decayTypeString), getHalfTimeFromString(halfTimeString)));
+                                    //System.out.println("UNSTABLE, "+id + ", " + elementName + ", " + numberNeurons + ", " + numberProtons + ", " + decayTypeString + ", " + halfTimeString);
                                 }
                             }
                         }
@@ -83,19 +93,97 @@ public class JsonReader {
         } catch (ParseException ex) {
             Logger.getLogger(JsonReader.class.getName()).log(Level.SEVERE, null, ex);
         }
+        System.out.println("done scanning");
     }
 
-    public DecayType getDecayTypeFromString(String decayTypeString){
-        return null;//TODO
+    public boolean isValidDecayType(String decayTypeString) {
+        if (decayTypeString.contains("&beta;-")) {
+            return true;
+        } else if (decayTypeString.contains("&beta;+")) {
+            return true;
+        } else if (decayTypeString.contains("&alpha;")) {
+            return true;
+        }
+        return false;
     }
 
-    public double getHalfTimeFromString(String halfTimeString){
-        return 0.0;//TODO
+    public DecayType getDecayTypeFromString(String decayTypeString) {
+        if (decayTypeString.contains("&beta;-")) {
+            return DecayType.BETA_MINUS;
+        } else if (decayTypeString.contains("&beta;+")) {
+            return DecayType.BETA_PLUS;
+        } else {
+            return DecayType.ALPHA;
+        }
+    }
+
+    public double getHalfTimeFromString(String halfTimeString) {
+        String[] values = halfTimeString.split(" ");
+        String timeValueString = values[0];
+        String timeStampString = values[1];
+        switch (timeStampString) {
+            case "s":
+                return Double.parseDouble(timeValueString);
+            case "ms":
+                return Double.parseDouble(timeValueString) / 1000;
+            case "?s":
+                return Double.parseDouble(timeValueString) / 1000000;
+            case "ns":
+                return Double.parseDouble(timeValueString) / 1000000000;
+            case "m":
+                return Double.parseDouble(timeValueString) * 60;
+            case "h":
+                return Double.parseDouble(timeValueString) * 3600;
+            case "d":
+                return Double.parseDouble(timeValueString) * 86400;
+            case "y":
+                return Double.parseDouble(timeValueString) * 31536000;
+        }
+        return 0.0;
+    }
+
+    public void writeNewJson() {
+        JSONObject root = new JSONObject();
+        JSONArray isotopeArray = new JSONArray();
+        JSONArray idArray = new JSONArray();
+        JSONArray elementNameArray = new JSONArray();
+        for (Isotope isotope : simpleIsotopeList) {
+            JSONObject isotopeObject = new JSONObject();
+            if (isotope.getDecayType().isStable()) {
+                isotopeObject.put("d", "S");
+            } else if (isotope.getDecayType() == DecayType.BETA_MINUS) {
+                isotopeObject.put("d", "B-");
+            } else if (isotope.getDecayType() == DecayType.BETA_PLUS) {
+                isotopeObject.put("d", "B+");
+            } else {
+                isotopeObject.put("d", "A");
+            }
+            isotopeObject.put("n", isotope.getNumberNeutrons());
+            isotopeObject.put("z", isotope.getNumberProtons());
+            isotopeArray.add(isotopeObject);
+        }
+        for (String id : idList) {
+            idArray.add(id);
+        }
+        for (String elementName : elementNameList) {
+            elementNameArray.add(elementName);
+        }
+
+        root.put("isotopes", isotopeArray);
+        root.put("ids", idArray);
+        root.put("elementnames", elementNameArray);
+        try {
+            Files.write(Paths.get("../IDPA_RadioactiveDecay/src/main/resources/json/newIsotopes.json"), root.toJSONString().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("done writing");
     }
 
 
     public static void main(String[] args) throws Exception {
         JsonReader jsr = new JsonReader();
         jsr.scannJson();
+        jsr.writeNewJson();
     }
 }
