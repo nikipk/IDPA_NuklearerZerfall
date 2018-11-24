@@ -58,7 +58,7 @@ public class JsonReader {
                     String elementName = (String) nameArray.get(numberProtons);
                     if (((String) isotopeObject.get("h")).equals("stable")) {
                         simpleIsotopeList.add(new StableIsotope(id, elementName, numberNeurons, numberProtons));
-                        System.out.println(id+", "+elementName+", "+numberNeurons+", "+numberProtons);
+                        //System.out.println(id+", "+elementName+", "+numberNeurons+", "+numberProtons);
                     } else {
                         if(isotopeObject.containsKey("dm")) {
                             JSONArray isotopeDecayArray = (JSONArray) isotopeObject.get("dm");
@@ -68,7 +68,9 @@ public class JsonReader {
                                 String decayTypeString = (String) decayArray.get(decayNumber);
                                 String halfTimeString = (String) isotopeObject.get("h");
                                 simpleIsotopeList.add(new UnstableIsotope(id, elementName, numberNeurons, numberProtons, getDecayTypeFromString(decayTypeString), getHalfTimeFromString(halfTimeString)));
-                                System.out.println(id + ", " + elementName + ", " + numberNeurons + ", " + numberProtons+ ", " +decayTypeString+ ", "+halfTimeString);
+                                if(halfTimeString.contains("eV")){
+                                    System.out.println(id + ", " + elementName + ", " + numberNeurons + ", " + numberProtons+ ", " +decayTypeString+ ", "+halfTimeString);
+                                }
                             }
                         }
                     }
@@ -88,7 +90,7 @@ public class JsonReader {
     }
 
     public double getHalfTimeFromString(String halfTimeString){
-        return 0.0;
+        return 0.0;//TODO
     }
 
 
