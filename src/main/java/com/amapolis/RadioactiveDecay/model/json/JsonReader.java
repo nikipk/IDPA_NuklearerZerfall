@@ -253,6 +253,10 @@ public class JsonReader {
         }
     }
 
+    public void giveEmergingIsotopes(){
+        //TODO
+    }
+
     public static void main(String[] args) throws Exception {
         JsonReader jsr = new JsonReader();
         jsr.scannJson();
