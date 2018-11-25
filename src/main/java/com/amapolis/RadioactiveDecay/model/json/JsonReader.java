@@ -43,7 +43,8 @@ public class JsonReader {
         elementNameList = new HashSet<>();
     }
 
-    public void scannJson() {
+    /*
+    public void scannOldJson() {
         JSONParser parser = new JSONParser();
         try {
             Object rootObject = parser.parse(new FileReader("../IDPA_RadioactiveDecay/src/main/resources/json/isotopes.json"));
@@ -98,6 +99,7 @@ public class JsonReader {
         System.out.println("done scanning");
     }
 
+    /*
     public boolean isValidDecayType(String decayTypeString) {
         if (decayTypeString.contains("&beta;-")) {
             return true;
@@ -119,6 +121,8 @@ public class JsonReader {
         }
     }
 
+
+    /*
     public double getHalfTimeFromString(String halfTimeString) {
         String[] values = halfTimeString.split(" ");
         String timeValueString = values[0];
@@ -133,7 +137,7 @@ public class JsonReader {
             String base = timeValueString.split("E-")[0];
             String exponent = timeValueString.split("E-")[1];
             //System.out.println(Double.parseDouble(base)/ Math.pow(10, Double.parseDouble(exponent)));
-            return Double.parseDouble(base)/ Math.pow(10, Double.parseDouble(exponent));
+            return Double.parseDouble(base) / Math.pow(10, Double.parseDouble(exponent));
         } else if (timeValueString.contains("E")) {
             String base = timeValueString.split("E")[0];
             String exponent = timeValueString.split("E")[1];
@@ -202,11 +206,56 @@ public class JsonReader {
         }
         System.out.println("done writing");
     }
+    */
 
+    public void scannJson() {
+        JSONParser parser = new JSONParser();
+        try {
+            Object rootObject = parser.parse(new FileReader("../IDPA_RadioactiveDecay/src/main/resources/json/newIsotopes.json"));
+            JSONObject root = (JSONObject) rootObject;
+
+            JSONArray isotopeArray = (JSONArray) root.get("isotopes");
+            JSONArray nameArray = (JSONArray) root.get("elementnames");
+            JSONArray shortNameArray = (JSONArray) root.get("ids");
+
+            for (int i = 0; i < shortNameArray.size(); i++) {
+                idList.add((String) shortNameArray.get(i));
+                elementNameList.add((String) nameArray.get(i));
+            }
+
+            for (int i = 0; i < isotopeArray.size(); i++) {
+                JSONObject isotopeObject = (JSONObject) isotopeArray.get(i);
+                int numberProtons = Math.toIntExact((long)isotopeObject.get("z"));
+                int numberNeurons = Math.toIntExact((long)isotopeObject.get("n"));
+                if (((String) isotopeObject.get("d")).equals("S")) {
+                    simpleIsotopeList.add(new StableIsotope(((String)shortNameArray.get(numberProtons)), ((String)nameArray.get(numberProtons)), numberNeurons, numberProtons));
+                }else{
+                    simpleIsotopeList.add(new UnstableIsotope(((String)shortNameArray.get(numberProtons)), ((String)nameArray.get(numberProtons)), numberNeurons, numberProtons, getNewDecayTypeFromString((String)isotopeObject.get("d")), (double)isotopeObject.get("h")));
+                }
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(JsonReader.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(JsonReader.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParseException ex) {
+            Logger.getLogger(JsonReader.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println("done scanning new Isotopes");
+    }
+
+    public DecayType getNewDecayTypeFromString(String decayTypeString) {
+        if (decayTypeString.contains("B-")) {
+            return DecayType.BETA_MINUS;
+        } else if (decayTypeString.contains("B+")) {
+            return DecayType.BETA_PLUS;
+        } else {
+            return DecayType.ALPHA;
+        }
+    }
 
     public static void main(String[] args) throws Exception {
         JsonReader jsr = new JsonReader();
         jsr.scannJson();
-        jsr.writeNewJson();
+        //jsr.writeNewJson();
     }
 }
