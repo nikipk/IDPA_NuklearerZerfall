@@ -78,6 +78,8 @@ public class JsonReader {
                                 String decayTypeString = (String) decayArray.get(decayNumber);
                                 if (isValidDecayType(decayTypeString)) {
                                     String halfTimeString = (String) isotopeObject.get("h");
+                                    System.out.println(halfTimeString);
+                                    double test = getHalfTimeFromString(halfTimeString);
                                     simpleIsotopeList.add(new UnstableIsotope(id, elementName, numberNeurons, numberProtons, getDecayTypeFromString(decayTypeString), getHalfTimeFromString(halfTimeString)));
                                     //System.out.println("UNSTABLE, "+id + ", " + elementName + ", " + numberNeurons + ", " + numberProtons + ", " + decayTypeString + ", " + halfTimeString);
                                 }
@@ -121,23 +123,41 @@ public class JsonReader {
         String[] values = halfTimeString.split(" ");
         String timeValueString = values[0];
         String timeStampString = values[1];
-        switch (timeStampString) {
-            case "s":
-                return Double.parseDouble(timeValueString);
-            case "ms":
-                return Double.parseDouble(timeValueString) / 1000;
-            case "?s":
-                return Double.parseDouble(timeValueString) / 1000000;
-            case "ns":
-                return Double.parseDouble(timeValueString) / 1000000000;
-            case "m":
-                return Double.parseDouble(timeValueString) * 60;
-            case "h":
-                return Double.parseDouble(timeValueString) * 3600;
-            case "d":
-                return Double.parseDouble(timeValueString) * 86400;
-            case "y":
-                return Double.parseDouble(timeValueString) * 31536000;
+        //System.out.println(halfTimeString+"   -   "+timeValueString);
+        if (timeValueString.contains("E+")) {
+            String base = timeValueString.split("E+")[0];
+            String exponent = timeValueString.split("E+")[1];
+            //System.out.println(Math.pow(Double.parseDouble(base), Double.parseDouble(exponent)));
+            return Math.pow(Double.parseDouble(base), Double.parseDouble(exponent));
+        } else if (timeValueString.contains("E-")) {
+            String base = timeValueString.split("E-")[0];
+            String exponent = timeValueString.split("E-")[1];
+            //System.out.println(Double.parseDouble(base)/ Math.pow(10, Double.parseDouble(exponent)));
+            return Double.parseDouble(base)/ Math.pow(10, Double.parseDouble(exponent));
+        } else if (timeValueString.contains("E")) {
+            String base = timeValueString.split("E")[0];
+            String exponent = timeValueString.split("E")[1];
+            //System.out.println(Math.pow(Double.parseDouble(base), Double.parseDouble(exponent)));
+            return Math.pow(Double.parseDouble(base), Double.parseDouble(exponent));
+        } else {
+            switch (timeStampString) {
+                case "s":
+                    return Double.parseDouble(timeValueString);
+                case "ms":
+                    return Double.parseDouble(timeValueString) / 1000;
+                case "?s":
+                    return Double.parseDouble(timeValueString) / 1000000;
+                case "ns":
+                    return Double.parseDouble(timeValueString) / 1000000000;
+                case "m":
+                    return Double.parseDouble(timeValueString) * 60;
+                case "h":
+                    return Double.parseDouble(timeValueString) * 3600;
+                case "d":
+                    return Double.parseDouble(timeValueString) * 86400;
+                case "y":
+                    return Double.parseDouble(timeValueString) * 31536000;
+            }
         }
         return 0.0;
     }
@@ -151,15 +171,19 @@ public class JsonReader {
             JSONObject isotopeObject = new JSONObject();
             if (isotope.getDecayType().isStable()) {
                 isotopeObject.put("d", "S");
-            } else if (isotope.getDecayType() == DecayType.BETA_MINUS) {
-                isotopeObject.put("d", "B-");
-            } else if (isotope.getDecayType() == DecayType.BETA_PLUS) {
-                isotopeObject.put("d", "B+");
             } else {
-                isotopeObject.put("d", "A");
+                if (isotope.getDecayType() == DecayType.BETA_MINUS) {
+                    isotopeObject.put("d", "B-");
+                } else if (isotope.getDecayType() == DecayType.BETA_PLUS) {
+                    isotopeObject.put("d", "B+");
+                } else {
+                    isotopeObject.put("d", "A");
+                }
+                double halfTime = ((UnstableIsotope) isotope).getHalfTimeInS();
+                isotopeObject.put("h", halfTime);
             }
-            isotopeObject.put("n", isotope.getNumberNeutrons());
             isotopeObject.put("z", isotope.getNumberProtons());
+            isotopeObject.put("n", isotope.getNumberNeutrons());
             isotopeArray.add(isotopeObject);
         }
         for (String id : idList) {
@@ -168,7 +192,6 @@ public class JsonReader {
         for (String elementName : elementNameList) {
             elementNameArray.add(elementName);
         }
-
         root.put("isotopes", isotopeArray);
         root.put("ids", idArray);
         root.put("elementnames", elementNameArray);
