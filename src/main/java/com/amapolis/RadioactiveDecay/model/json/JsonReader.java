@@ -274,10 +274,36 @@ public class JsonReader {
         System.out.println("done giving emerging isotopes");
     }
 
+    public void printDecayTrace(){
+        int counter = 0;
+        System.out.println("started printing");
+        for(Isotope isotope: isotopeList){
+            if(!(isotope.getDecayType() == DecayType.STABLE)){
+                try {
+                    Isotope testIsotope = isotope;
+                    System.out.print(testIsotope.getId() + "  >  ");
+                    testIsotope = ((UnstableIsotope) testIsotope).getEmergingIsotope();
+                    while (!(testIsotope.getDecayType() == DecayType.STABLE)) {
+                        System.out.print(testIsotope.getId() + "  >  ");
+                        testIsotope = ((UnstableIsotope) testIsotope).getEmergingIsotope();
+                    }
+                    System.out.println(testIsotope.getId());
+                    counter++;
+                } catch (Exception e){
+                    System.out.println("UNDEFINED");
+                }
+            }else{
+                System.out.println(isotope.getId());
+            }
+        }
+        System.out.println(counter + " possible start isotope");
+    }
+
     public static void main(String[] args) throws Exception {
         JsonReader jsr = new JsonReader();
         jsr.scannJson();
         jsr.giveEmergingIsotopes();
+        jsr.printDecayTrace();
         //jsr.writeNewJson();
     }
 }

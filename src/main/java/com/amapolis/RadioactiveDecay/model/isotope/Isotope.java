@@ -13,7 +13,7 @@ public abstract class Isotope {
     private DecayType decayType;
 
     public Isotope(String id, String elementName, int numberNeutrons, int numberProtons, DecayType decayType) {
-        this.id = id+numberProtons;
+        this.id = id+(numberProtons+numberNeutrons);
         this.elementName = elementName;
         this.numberNeutrons = numberNeutrons;
         this.numberProtons = numberProtons;
