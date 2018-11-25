@@ -32,19 +32,17 @@ import org.json.simple.parser.ParseException;
  */
 public class JsonReader {
 
-    private Set<Isotope> simpleIsotopeList;
     private Set<Isotope> isotopeList;
     private ArrayList<String> idList;
     private ArrayList<String> elementNameList;
 
     public JsonReader() {
-        simpleIsotopeList = new HashSet<>();
         isotopeList = new HashSet<>();
         idList = new ArrayList<>();
         elementNameList = new ArrayList<>();
     }
 
-
+    /*
     public void scannOldJson() {
         JSONParser parser = new JSONParser();
         try {
@@ -69,7 +67,7 @@ public class JsonReader {
                     String id = (String) shortNameArray.get(numberProtons);
                     String elementName = (String) nameArray.get(numberProtons);
                     if (((String) isotopeObject.get("h")).equals("stable")) {
-                        simpleIsotopeList.add(new StableIsotope(id, elementName, numberNeurons, numberProtons));
+                        isotopeList.add(new StableIsotope(id, elementName, numberNeurons, numberProtons));
                         //System.out.println("STABLE, "+id+", "+elementName+", "+numberNeurons+", "+numberProtons);
                     } else {
                         if (isotopeObject.containsKey("dm")) {
@@ -82,7 +80,7 @@ public class JsonReader {
                                     String halfTimeString = (String) isotopeObject.get("h");
                                     System.out.println(halfTimeString);
                                     double test = getHalfTimeFromString(halfTimeString);
-                                    simpleIsotopeList.add(new UnstableIsotope(id, elementName, numberNeurons, numberProtons, getDecayTypeFromString(decayTypeString), getHalfTimeFromString(halfTimeString)));
+                                    isotopeList.add(new UnstableIsotope(id, elementName, numberNeurons, numberProtons, getOldDecayTypeFromString(decayTypeString), getHalfTimeFromString(halfTimeString)));
                                     //System.out.println("UNSTABLE, "+id + ", " + elementName + ", " + numberNeurons + ", " + numberProtons + ", " + decayTypeString + ", " + halfTimeString);
                                 }
                             }
@@ -100,7 +98,6 @@ public class JsonReader {
         System.out.println("done scanning");
     }
 
-
     public boolean isValidDecayType(String decayTypeString) {
         if (decayTypeString.contains("&beta;-")) {
             return true;
@@ -112,7 +109,7 @@ public class JsonReader {
         return false;
     }
 
-    public DecayType getDecayTypeFromString(String decayTypeString) {
+    public DecayType getOldDecayTypeFromString(String decayTypeString) {
         if (decayTypeString.contains("&beta;-")) {
             return DecayType.BETA_MINUS;
         } else if (decayTypeString.contains("&beta;+")) {
@@ -121,7 +118,6 @@ public class JsonReader {
             return DecayType.ALPHA;
         }
     }
-
 
     public double getHalfTimeFromString(String halfTimeString) {
         String[] values = halfTimeString.split(" ");
@@ -166,13 +162,12 @@ public class JsonReader {
         return 0.0;
     }
 
-
     public void writeNewJson() {
         JSONObject root = new JSONObject();
         JSONArray isotopeArray = new JSONArray();
         JSONArray idArray = new JSONArray();
         JSONArray elementNameArray = new JSONArray();
-        for (Isotope isotope : simpleIsotopeList) {
+        for (Isotope isotope : isotopeList) {
             JSONObject isotopeObject = new JSONObject();
             if (isotope.getDecayType().isStable()) {
                 isotopeObject.put("d", "S");
@@ -207,6 +202,7 @@ public class JsonReader {
         }
         System.out.println("done writing");
     }
+    */
 
     public void scannJson() {
         JSONParser parser = new JSONParser();
@@ -228,9 +224,9 @@ public class JsonReader {
                 int numberProtons = Math.toIntExact((long) isotopeObject.get("z"));
                 int numberNeurons = Math.toIntExact((long) isotopeObject.get("n"));
                 if (((String) isotopeObject.get("d")).equals("S")) {
-                    simpleIsotopeList.add(new StableIsotope(((String) shortNameArray.get(numberProtons)), ((String) nameArray.get(numberProtons)), numberNeurons, numberProtons));
+                    isotopeList.add(new StableIsotope(((String) shortNameArray.get(numberProtons)), ((String) nameArray.get(numberProtons)), numberNeurons, numberProtons));
                 } else {
-                    simpleIsotopeList.add(new UnstableIsotope(((String) shortNameArray.get(numberProtons)), ((String) nameArray.get(numberProtons)), numberNeurons, numberProtons, getNewDecayTypeFromString((String) isotopeObject.get("d")), (double) isotopeObject.get("h")));
+                    isotopeList.add(new UnstableIsotope(((String) shortNameArray.get(numberProtons)), ((String) nameArray.get(numberProtons)), numberNeurons, numberProtons, getDecayTypeFromString((String) isotopeObject.get("d")), (double) isotopeObject.get("h")));
                 }
             }
         } catch (FileNotFoundException ex) {
@@ -240,10 +236,10 @@ public class JsonReader {
         } catch (ParseException ex) {
             Logger.getLogger(JsonReader.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println("done scanning new Isotopes");
+        System.out.println("done scanning Isotopes");
     }
 
-    public DecayType getNewDecayTypeFromString(String decayTypeString) {
+    public DecayType getDecayTypeFromString(String decayTypeString) {
         if (decayTypeString.contains("B-")) {
             return DecayType.BETA_MINUS;
         } else if (decayTypeString.contains("B+")) {
@@ -253,73 +249,26 @@ public class JsonReader {
         }
     }
 
-    public boolean isotopeExists(int numberNeurons, int numberProtons) {
-        for (Isotope isotope : simpleIsotopeList) {
-            if ((isotope.getNumberNeutrons() == numberNeurons) && (isotope.getNumberProtons() == numberProtons)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean hasEmergingIsotope(Isotope isotope){
-        int numberNeuronsEmergingIsotope;
-        int numberProtonsEmergingIsotope;
-        if (isotope.getDecayType() == DecayType.BETA_MINUS) {
-            numberNeuronsEmergingIsotope = isotope.getNumberNeutrons() - 1;
-            numberProtonsEmergingIsotope = isotope.getNumberNeutrons() + 1;
-        } else if (isotope.getDecayType() == DecayType.BETA_PLUS) {
-            numberNeuronsEmergingIsotope = isotope.getNumberNeutrons() + 1;
-            numberProtonsEmergingIsotope = isotope.getNumberNeutrons() - 1;
-        } else {
-            numberNeuronsEmergingIsotope = isotope.getNumberNeutrons() - 2;
-            numberProtonsEmergingIsotope = isotope.getNumberNeutrons() - 2;
-        }
-        return isotopeExists(numberNeuronsEmergingIsotope, numberProtonsEmergingIsotope);
-    }
-
-    public Isotope getSpecificIsotope(int numberNeurons, int numberProtons) {
-        for (Isotope isotope : simpleIsotopeList) {
-            if ((isotope.getNumberNeutrons() == numberNeurons) && (isotope.getNumberProtons() == numberProtons)) {
-                return isotope;
-            }
-        }
-        return null;
-    }
-
-    public Isotope getEmergingisotope(Isotope isotope) {
-        int numberNeuronsEmergingIsotope;
-        int numberProtonsEmergingIsotope;
-        if (isotope.getDecayType() == DecayType.BETA_MINUS) {
-            numberNeuronsEmergingIsotope = isotope.getNumberNeutrons() - 1;
-            numberProtonsEmergingIsotope = isotope.getNumberNeutrons() + 1;
-        } else if (isotope.getDecayType() == DecayType.BETA_PLUS) {
-            numberNeuronsEmergingIsotope = isotope.getNumberNeutrons() + 1;
-            numberProtonsEmergingIsotope = isotope.getNumberNeutrons() - 1;
-        } else {
-            numberNeuronsEmergingIsotope = isotope.getNumberNeutrons() - 2;
-            numberProtonsEmergingIsotope = isotope.getNumberNeutrons() - 2;
-        }
-        if(isotopeExists(numberNeuronsEmergingIsotope, numberProtonsEmergingIsotope)){
-            if(!(getSpecificIsotope(numberNeuronsEmergingIsotope, numberProtonsEmergingIsotope).getDecayType() == DecayType.STABLE)){
-                ((UnstableIsotope)isotope).setEmergingIsotope(getEmergingisotope(getSpecificIsotope(numberNeuronsEmergingIsotope, numberProtonsEmergingIsotope)));
-                return isotope;
-            }else{
-                return getSpecificIsotope(numberNeuronsEmergingIsotope, numberProtonsEmergingIsotope);
-            }
-        }
-        Isotope emergingIsotope =
-    }
-
     public void giveEmergingIsotopes() {
-        for (Isotope isotope : simpleIsotopeList) {
-            if (!isotope.getDecayType().isStable()) {
-                 if(hasEmergingIsotope(isotope)){
-                     Isotope emergingIsotope = getEmergingisotope(isotope);
-                     ((UnstableIsotope) isotope).setEmergingIsotope(emergingIsotope);
-                 }
-            } else {
-                isotopeList.add(isotope);
+        for (Isotope isotope : isotopeList) {
+            if (!(isotope.getDecayType() == DecayType.STABLE)) {
+                int numberNeuronsEmergingIsotope;
+                int numberProtonsEmergingIsotope;
+                if (isotope.getDecayType() == DecayType.BETA_MINUS) {
+                    numberNeuronsEmergingIsotope = isotope.getNumberNeutrons() - 1;
+                    numberProtonsEmergingIsotope = isotope.getNumberProtons() + 1;
+                } else if (isotope.getDecayType() == DecayType.BETA_PLUS) {
+                    numberNeuronsEmergingIsotope = isotope.getNumberNeutrons() + 1;
+                    numberProtonsEmergingIsotope = isotope.getNumberProtons() - 1;
+                } else {
+                    numberNeuronsEmergingIsotope = isotope.getNumberNeutrons() - 2;
+                    numberProtonsEmergingIsotope = isotope.getNumberProtons() - 2;
+                }
+                for (Isotope emergingIsotope : isotopeList) {
+                    if(emergingIsotope.getNumberNeutrons() == numberNeuronsEmergingIsotope && emergingIsotope.getNumberProtons() == numberProtonsEmergingIsotope){
+                        ((UnstableIsotope)isotope).setEmergingIsotope(emergingIsotope);
+                    }
+                }
             }
         }
         System.out.println("done giving emerging isotopes");
