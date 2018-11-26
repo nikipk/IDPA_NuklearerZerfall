@@ -45,7 +45,7 @@ public class JsonReader {
     /**
      * This method reads the original json file and fills the isotopeList with Isotope objects (without emerging isotopes)
      */
-    public void scannOldJson() {
+    private void scannOldJson() {
         JSONParser parser = new JSONParser();
         try {
             Object rootObject = parser.parse(new FileReader("../IDPA_RadioactiveDecay/src/main/resources/json/oldIsotopes.json"));
@@ -101,7 +101,7 @@ public class JsonReader {
      *
      * @param decayTypeString
      */
-    public boolean isValidDecayType(String decayTypeString) {
+    private boolean isValidDecayType(String decayTypeString) {
         if (decayTypeString.contains("&beta;-")) {
             return true;
         } else if (decayTypeString.contains("&beta;+")) {
@@ -117,7 +117,7 @@ public class JsonReader {
      *
      * @param decayTypeString
      */
-    public DecayType getOldDecayTypeFromString(String decayTypeString) {
+    private DecayType getOldDecayTypeFromString(String decayTypeString) {
         if (decayTypeString.contains("&beta;-")) {
             return DecayType.BETA_MINUS;
         } else if (decayTypeString.contains("&beta;+")) {
@@ -132,7 +132,7 @@ public class JsonReader {
      *
      * @param halfTimeString
      */
-    public double getHalfTimeFromString(String halfTimeString) {
+    private double getHalfTimeFromString(String halfTimeString) {
         String[] values = halfTimeString.split(" ");
         String timeValueString = values[0];
         String timeStampString = values[1];
@@ -174,7 +174,7 @@ public class JsonReader {
     /**
      * This method writes a compact version of the original json file witj only relevant information
      */
-    public void writeNewJson() {
+    private void writeNewJson() {
         JSONObject root = new JSONObject();
         JSONArray isotopeArray = new JSONArray();
         JSONArray idArray = new JSONArray();
@@ -218,7 +218,7 @@ public class JsonReader {
     /**
      * This Method reads the compacted json file and fills the isotopeList with Isotope objects (without emerging isotopes)
      */
-    public void scannJson() {
+    private void scannJson() {
         JSONParser parser = new JSONParser();
         try {
             Object rootObject = parser.parse(new FileReader("../IDPA_RadioactiveDecay/src/main/resources/json/newIsotopes.json"));
@@ -255,7 +255,7 @@ public class JsonReader {
      * @param decayTypeString
      * @return
      */
-    public DecayType getDecayTypeFromString(String decayTypeString) {
+    private DecayType getDecayTypeFromString(String decayTypeString) {
         if (decayTypeString.contains("B-")) {
             return DecayType.BETA_MINUS;
         } else if (decayTypeString.contains("B+")) {
@@ -268,7 +268,7 @@ public class JsonReader {
     /**
      * This method gives every isotope in the isotopeList a emerging isotope
      */
-    public void giveEmergingIsotopes() {
+    private void giveEmergingIsotopes() {
         for (Isotope isotope : isotopeList) {
             if (!(isotope.getDecayType() == DecayType.STABLE)) {
                 int numberNeuronsEmergingIsotope;
@@ -295,7 +295,7 @@ public class JsonReader {
     /**
      * This method prints the decay of every isotope in the isotopeList
      */
-    public void printDecayTrace() {
+    private void printDecayTrace() {
         int counter = 0;
         System.out.println("started printing");
         for (Isotope isotope : isotopeList) {
@@ -310,7 +310,7 @@ public class JsonReader {
                     }
                     System.out.println(testIsotope.getId());
                     counter++;
-                } catch (Exception e) {
+                } catch (NullPointerException e) {
                     System.out.println("UNDEFINED");
                 }
             } else {
@@ -318,6 +318,28 @@ public class JsonReader {
             }
         }
         System.out.println(counter + " possible start isotope");
+    }
+
+    /**
+     *This method removes isotopes from the isotopeList which don't decay to a known isotope
+     */
+    private void cleanDecayTrace() {
+        Set<Isotope> uncertainIsotopes = new HashSet<>();
+        for (Isotope isotope : isotopeList) {
+            if (!(isotope.getDecayType() == DecayType.STABLE)) {
+                try {
+                    Isotope testIsotope = isotope;
+                    testIsotope = ((UnstableIsotope) testIsotope).getEmergingIsotope();
+                    while (!(testIsotope.getDecayType() == DecayType.STABLE)) {
+                        testIsotope = ((UnstableIsotope) testIsotope).getEmergingIsotope();
+                    }
+                } catch (NullPointerException e) {
+                    uncertainIsotopes.add(isotope);
+                }
+            }
+        }
+        isotopeList.removeAll(uncertainIsotopes);
+        System.out.println("finished cleaning");
     }
 
     /**
@@ -331,10 +353,9 @@ public class JsonReader {
         return isotopeList;
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args){
         JsonReader jsr = new JsonReader();
         jsr.getIsotopeList();
         jsr.printDecayTrace();
-        //jsr.writeNewJson();
     }
 }

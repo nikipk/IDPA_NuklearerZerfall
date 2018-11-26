@@ -8,12 +8,13 @@ import javafx.scene.paint.Color;
  */
 public abstract class Isotope {
     
-    private String id, elementName;
+    private String id, elementName, shortElementName;
     private int numberNeutrons, numberProtons;     
     private DecayType decayType;
 
     public Isotope(String id, String elementName, int numberNeutrons, int numberProtons, DecayType decayType) {
         this.id = id+(numberProtons+numberNeutrons);
+        this.shortElementName = id;
         this.elementName = elementName;
         this.numberNeutrons = numberNeutrons;
         this.numberProtons = numberProtons;
@@ -38,6 +39,10 @@ public abstract class Isotope {
 
     public int getAtomicMass(){
         return numberNeutrons + numberProtons;
+    }
+
+    public String getShortElementName() {
+        return shortElementName;
     }
 
     public DecayType getDecayType() {
