@@ -13,11 +13,11 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import com.amapolis.RadioactiveDecay.model.isotope.Isotope;
-import com.amapolis.RadioactiveDecay.model.json.JsonReader;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
 
 public class ChooseIsotopeController implements Initializable {
 
@@ -76,6 +76,7 @@ public class ChooseIsotopeController implements Initializable {
         double amount = Double.parseDouble(amountField.getText());
         mainWindowController.addIsotopeToTable(new IsotopeTableElement(selectedIsotope, amount));
         System.out.println(amount+" atoms of the isotope "+selectedIsotope.getId()+ " selected");
+        ((Stage) optionTable.getScene().getWindow()).close();
     }
 
     private ArrayList<Isotope> getOptionList(String inputString) {
