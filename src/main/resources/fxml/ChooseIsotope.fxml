@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="595.0" prefWidth="980.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.amapolis.RadioactiveDecay.controller.ChooseIsotopeController">
+   <top>
+      <Label prefHeight="91.0" prefWidth="736.0" text="Choose a start isotope" BorderPane.alignment="CENTER">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+   </top>
+   <center>
+      <GridPane BorderPane.alignment="CENTER">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="705.0" minWidth="10.0" prefWidth="606.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="550.0" minWidth="10.0" prefWidth="117.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="550.0" minWidth="10.0" prefWidth="265.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints maxHeight="163.0" minHeight="10.0" prefHeight="75.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="325.0" minHeight="10.0" prefHeight="86.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="370.0" minHeight="10.0" prefHeight="78.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="370.0" minHeight="10.0" prefHeight="78.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="370.0" minHeight="10.0" prefHeight="199.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <TextField fx:id="inputField" onKeyReleased="#setOptionTable" prefHeight="35.0" prefWidth="490.0" GridPane.rowIndex="1" />
+            <Label prefHeight="27.0" prefWidth="320.0" text="Input: id+nuclear mass / element name + atomic mass" />
+            <Label prefHeight="32.0" prefWidth="256.0" text="Options" GridPane.columnIndex="2" />
+            <TableView fx:id="optionTable" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.rowSpan="4">
+              <columns>
+                <TableColumn fx:id="optionCol" prefWidth="245.0" text="Options" />
+              </columns>
+            </TableView>
+            <Label prefHeight="35.0" prefWidth="123.0" text="Amount of atoms" GridPane.rowIndex="2" />
+            <TextField fx:id="amountField" prefHeight="36.0" prefWidth="705.0" GridPane.rowIndex="3" />
+            <Button mnemonicParsing="false" onAction="#selectIsotope" prefHeight="148.0" prefWidth="643.0" text="Select" GridPane.rowIndex="4" />
+         </children>
+      </GridPane>
+   </center>
+</BorderPane>

@@ -75,7 +75,7 @@ public class ChooseIsotopeController implements Initializable {
         System.out.println(amount+" atoms of the isotope "+selectedIsotope.getId()+ " selected");
     }
 
-    public ArrayList<Isotope> getOptionList(String inputString) {
+    private ArrayList<Isotope> getOptionList(String inputString) {
         if (isValidInput(isotopeSet, inputString.toLowerCase())) {
             ArrayList<Isotope> optionList = new ArrayList<>();
             for (Isotope isotope : isotopeSet) {
@@ -91,7 +91,7 @@ public class ChooseIsotopeController implements Initializable {
     }
 
 
-    public boolean isValidInput(Set<Isotope> isotopeSet, String inputString) {
+    private boolean isValidInput(Set<Isotope> isotopeSet, String inputString) {
         for (Isotope isotope : isotopeSet) {
             if (isotope.getId().toLowerCase().contains(inputString) || isotope.getElementName().toLowerCase().contains(inputString)) {
                 return true;
@@ -100,7 +100,7 @@ public class ChooseIsotopeController implements Initializable {
         return false;
     }
 
-    public Isotope getTopOption(ArrayList<Isotope> options) {
+    private Isotope getTopOption(ArrayList<Isotope> options) {
         Isotope topOption = options.get(0);
         for (Isotope option : options) {
             if (option.getAtomicMass() < topOption.getAtomicMass()) {
@@ -110,7 +110,7 @@ public class ChooseIsotopeController implements Initializable {
         return topOption;
     }
 
-    public ArrayList<Isotope> sortOptionList(ArrayList<Isotope> unsortedIsotopeList) {
+    private ArrayList<Isotope> sortOptionList(ArrayList<Isotope> unsortedIsotopeList) {
         ArrayList<Isotope> sortedIsotopeList = new ArrayList<>();
         int size = unsortedIsotopeList.size();
         for (int i = 0; i < size; i++) {
