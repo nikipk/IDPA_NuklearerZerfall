@@ -173,7 +173,7 @@ public class JsonFormatter {
     }
 
     /**
-     * This method writes a compact version of the original json file witj only relevant information
+     * This method writes a compact version of the original json file with only relevant information
      */
     private void writeNewJson() {
         JSONObject root = new JSONObject();
