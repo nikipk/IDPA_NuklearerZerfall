@@ -33,7 +33,7 @@
           <NumberAxis fx:id="yAxis" label="Time in seconds" side="BOTTOM" />
         </xAxis>
         <yAxis>
-          <NumberAxis label="Amount istopes" side="LEFT" fx:id="xAxis" />
+          <NumberAxis label="Amount isotopes" side="LEFT" fx:id="xAxis" />
         </yAxis>
       </LineChart>
    </bottom>
