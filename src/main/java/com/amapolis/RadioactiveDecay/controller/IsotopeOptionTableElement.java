@@ -13,4 +13,9 @@ public class IsotopeOptionTableElement {
     public Isotope getOption() {
         return option;
     }
+
+    public String getId() {
+        return option.getId();
+    }
+
 }

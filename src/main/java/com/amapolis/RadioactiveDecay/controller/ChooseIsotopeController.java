@@ -2,6 +2,7 @@ package com.amapolis.RadioactiveDecay.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 
@@ -14,6 +15,8 @@ import com.amapolis.RadioactiveDecay.model.isotope.Isotope;
 import com.amapolis.RadioactiveDecay.model.json.JsonReader;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 
 public class ChooseIsotopeController implements Initializable {
 
@@ -26,9 +29,12 @@ public class ChooseIsotopeController implements Initializable {
     @FXML
     private TableColumn<IsotopeOptionTableElement, String> optionCol;
 
+    @FXML
+    private TextField inputField, amountField;
+
     /*
     public ChooseIsotopeController() {
-        isotopeSet = new JsonReader().getIsotopeList(); //TODO only temporary
+        isotopeSet = new JsonReader().getIsotopeList();
 
         double start = System.currentTimeMillis();
         ArrayList<Isotope> testList = getOptionList("u");
@@ -51,8 +57,22 @@ public class ChooseIsotopeController implements Initializable {
     */
 
     @FXML
-    private void clearTable(){
+    private void setOptionTable(){
+        shownOptions.clear();
+        try {
+            ArrayList<Isotope> options = getOptionList(inputField.getText());
+            for(Isotope option: options){
+                shownOptions.add(new IsotopeOptionTableElement(option));
+            }
+        } catch (Exception e){
+        }
+    }
 
+    @FXML
+    private void selectIsotope(ActionEvent ae){
+        Isotope selectedIsotope = optionTable.getSelectionModel().getSelectedItem().getOption();
+        int amount = Integer.parseInt(amountField.getText());
+        System.out.println(amount+" atoms of the isotope "+selectedIsotope.getId()+ " selected");
     }
 
     public ArrayList<Isotope> getOptionList(String inputString) {
@@ -106,6 +126,7 @@ public class ChooseIsotopeController implements Initializable {
         isotopeSet = new JsonReader().getIsotopeList();
         shownOptions = FXCollections.observableArrayList();
         optionTable.setItems(shownOptions);
+        optionCol.setCellValueFactory(new PropertyValueFactory<IsotopeOptionTableElement, String>("id"));
     }
 
     public static void main(String[] args) throws Exception {
