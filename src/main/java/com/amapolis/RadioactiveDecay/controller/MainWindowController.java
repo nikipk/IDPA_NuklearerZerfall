@@ -156,6 +156,9 @@ public class MainWindowController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         log.info("Started MainWindowController");
+
+        lineChart.setCreateSymbols(false);
+
         decayCalculator = new DecayCalculator();
         lineChartSeries = new ArrayList<>();
         isotopesInTable = FXCollections.observableArrayList();
@@ -172,7 +175,6 @@ public class MainWindowController implements Initializable {
         //todo make amount editable in table, => doesn't work (disabled edit in fxml too)
         //amountCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
         decayTypeCol.setCellValueFactory(new PropertyValueFactory<IsotopeTableElement, String>("decayType"));
-
     }
 
     private void showAlert(String title, String message) {
