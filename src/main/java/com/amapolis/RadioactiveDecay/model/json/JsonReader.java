@@ -32,18 +32,18 @@ import org.json.simple.parser.ParseException;
  */
 public class JsonReader {
 
-    private Set<Isotope> isotopeList;
+    private Set<Isotope> isotopeSet;
     private ArrayList<String> idList;
     private ArrayList<String> elementNameList;
 
     public JsonReader() {
-        isotopeList = new HashSet<>();
+        isotopeSet = new HashSet<>();
         idList = new ArrayList<>();
         elementNameList = new ArrayList<>();
     }
 
     /**
-     * This method reads the original json file and fills the isotopeList with Isotope objects (without emerging isotopes)
+     * This method reads the original json file and fills the isotopeSet with Isotope objects (without emerging isotopes)
      */
     private void scannOldJson() {
         JSONParser parser = new JSONParser();
@@ -69,7 +69,7 @@ public class JsonReader {
                     String id = (String) shortNameArray.get(numberProtons);
                     String elementName = (String) nameArray.get(numberProtons);
                     if (((String) isotopeObject.get("h")).equals("stable")) {
-                        isotopeList.add(new StableIsotope(id, elementName, numberNeurons, numberProtons));
+                        isotopeSet.add(new StableIsotope(id, elementName, numberNeurons, numberProtons));
                     } else {
                         if (isotopeObject.containsKey("dm")) {
                             JSONArray isotopeDecayArray = (JSONArray) isotopeObject.get("dm");
@@ -80,7 +80,7 @@ public class JsonReader {
                                 if (isValidDecayType(decayTypeString)) {
                                     String halfTimeString = (String) isotopeObject.get("h");
                                     double test = getHalfTimeFromString(halfTimeString);
-                                    isotopeList.add(new UnstableIsotope(id, elementName, numberNeurons, numberProtons, getOldDecayTypeFromString(decayTypeString), getHalfTimeFromString(halfTimeString)));
+                                    isotopeSet.add(new UnstableIsotope(id, elementName, numberNeurons, numberProtons, getOldDecayTypeFromString(decayTypeString), getHalfTimeFromString(halfTimeString)));
                                 }
                             }
                         }
@@ -179,7 +179,7 @@ public class JsonReader {
         JSONArray isotopeArray = new JSONArray();
         JSONArray idArray = new JSONArray();
         JSONArray elementNameArray = new JSONArray();
-        for (Isotope isotope : isotopeList) {
+        for (Isotope isotope : isotopeSet) {
             JSONObject isotopeObject = new JSONObject();
             if (isotope.getDecayType().isStable()) {
                 isotopeObject.put("d", "S");
@@ -216,7 +216,7 @@ public class JsonReader {
 
 
     /**
-     * This Method reads the compacted json file and fills the isotopeList with Isotope objects (without emerging isotopes)
+     * This Method reads the compacted json file and fills the isotopeSet with Isotope objects (without emerging isotopes)
      */
     private void scannJson() {
         JSONParser parser = new JSONParser();
@@ -235,9 +235,9 @@ public class JsonReader {
                 int numberProtons = Math.toIntExact((long) isotopeObject.get("z"));
                 int numberNeurons = Math.toIntExact((long) isotopeObject.get("n"));
                 if (((String) isotopeObject.get("d")).equals("S")) {
-                    isotopeList.add(new StableIsotope(((String) shortNameArray.get(numberProtons)), ((String) nameArray.get(numberProtons)), numberNeurons, numberProtons));
+                    isotopeSet.add(new StableIsotope(((String) shortNameArray.get(numberProtons)), ((String) nameArray.get(numberProtons)), numberNeurons, numberProtons));
                 } else {
-                    isotopeList.add(new UnstableIsotope(((String) shortNameArray.get(numberProtons)), ((String) nameArray.get(numberProtons)), numberNeurons, numberProtons, getDecayTypeFromString((String) isotopeObject.get("d")), (double) isotopeObject.get("h")));
+                    isotopeSet.add(new UnstableIsotope(((String) shortNameArray.get(numberProtons)), ((String) nameArray.get(numberProtons)), numberNeurons, numberProtons, getDecayTypeFromString((String) isotopeObject.get("d")), (double) isotopeObject.get("h")));
                 }
             }
         } catch (FileNotFoundException ex) {
@@ -266,10 +266,10 @@ public class JsonReader {
     }
 
     /**
-     * This method gives every isotope in the isotopeList a emerging isotope
+     * This method gives every isotope in the isotopeSet a emerging isotope
      */
     private void giveEmergingIsotopes() {
-        for (Isotope isotope : isotopeList) {
+        for (Isotope isotope : isotopeSet) {
             if (!(isotope.getDecayType() == DecayType.STABLE)) {
                 int numberNeuronsEmergingIsotope;
                 int numberProtonsEmergingIsotope;
@@ -283,7 +283,7 @@ public class JsonReader {
                     numberNeuronsEmergingIsotope = isotope.getNumberNeutrons() - 2;
                     numberProtonsEmergingIsotope = isotope.getNumberProtons() - 2;
                 }
-                for (Isotope emergingIsotope : isotopeList) {
+                for (Isotope emergingIsotope : isotopeSet) {
                     if (emergingIsotope.getNumberNeutrons() == numberNeuronsEmergingIsotope && emergingIsotope.getNumberProtons() == numberProtonsEmergingIsotope) {
                         ((UnstableIsotope) isotope).setEmergingIsotope(emergingIsotope);
                     }
@@ -293,12 +293,12 @@ public class JsonReader {
     }
 
     /**
-     * This method prints the decay of every isotope in the isotopeList
+     * This method prints the decay of every isotope in the isotopeSet
      */
     private void printDecayTrace() {
         int counter = 0;
         System.out.println("started printing");
-        for (Isotope isotope : isotopeList) {
+        for (Isotope isotope : isotopeSet) {
             if (!(isotope.getDecayType() == DecayType.STABLE)) {
                 try {
                     Isotope testIsotope = isotope;
@@ -321,11 +321,11 @@ public class JsonReader {
     }
 
     /**
-     *This method removes isotopes from the isotopeList which don't decay to a known isotope
+     *This method removes isotopes from the isotopeSet which don't decay to a known isotope
      */
     private void cleanDecayTrace() {
         Set<Isotope> uncertainIsotopes = new HashSet<>();
-        for (Isotope isotope : isotopeList) {
+        for (Isotope isotope : isotopeSet) {
             if (!(isotope.getDecayType() == DecayType.STABLE)) {
                 try {
                     Isotope testIsotope = isotope;
@@ -338,19 +338,19 @@ public class JsonReader {
                 }
             }
         }
-        isotopeList.removeAll(uncertainIsotopes);
+        isotopeSet.removeAll(uncertainIsotopes);
         System.out.println("finished cleaning");
     }
 
     /**
      * Reads json file and returns a Set of all isotopes.
      *
-     * @return isotopeList
+     * @return isotopeSet
      */
     public Set<Isotope> getIsotopeSet() {
         scannJson();
         giveEmergingIsotopes();
-        return isotopeList;
+        return isotopeSet;
     }
 
     public static void main(String[] args){
