@@ -22,14 +22,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 public class ChooseIsotopeController implements Initializable {
 
     private Set<Isotope> isotopeSet;
-    private ObservableList<IsotopeOptionTableElement> shownOptions;
+    private ObservableList<Isotope> shownOptions;
     private MainWindowController mainWindowController;
 
     @FXML
-    private TableView<IsotopeOptionTableElement> optionTable;
+    private TableView<Isotope> optionTable;
 
     @FXML
-    private TableColumn<IsotopeOptionTableElement, String> optionCol;
+    private TableColumn<Isotope, String> optionCol;
 
     @FXML
     private TextField inputField, amountField;
@@ -64,7 +64,7 @@ public class ChooseIsotopeController implements Initializable {
         try {
             ArrayList<Isotope> options = getOptionList(inputField.getText());
             for(Isotope option: options){
-                shownOptions.add(new IsotopeOptionTableElement(option));
+                shownOptions.add(option);
             }
         } catch (Exception e){
         }
@@ -72,8 +72,9 @@ public class ChooseIsotopeController implements Initializable {
 
     @FXML
     private void selectIsotope(ActionEvent ae){
-        Isotope selectedIsotope = optionTable.getSelectionModel().getSelectedItem().getOption();
-        int amount = Integer.parseInt(amountField.getText());
+        Isotope selectedIsotope = optionTable.getSelectionModel().getSelectedItem();
+        double amount = Double.parseDouble(amountField.getText());
+        mainWindowController.addIsotopeToTable(new IsotopeTableElement(selectedIsotope, amount));
         System.out.println(amount+" atoms of the isotope "+selectedIsotope.getId()+ " selected");
     }
 
@@ -132,6 +133,6 @@ public class ChooseIsotopeController implements Initializable {
         isotopeSet = IsotopeSetManager.getInstance().getIsotopeSet();
         shownOptions = FXCollections.observableArrayList();
         optionTable.setItems(shownOptions);
-        optionCol.setCellValueFactory(new PropertyValueFactory<IsotopeOptionTableElement, String>("id"));
+        optionCol.setCellValueFactory(new PropertyValueFactory<Isotope, String>("id"));
     }
 }

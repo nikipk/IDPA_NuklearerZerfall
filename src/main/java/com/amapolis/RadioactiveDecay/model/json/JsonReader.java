@@ -45,7 +45,7 @@ public class JsonReader {
     /**
      * This method reads the original json file and fills the isotopeSet with Isotope objects (without emerging isotopes)
      */
-    private void scannOldJson() {
+    private void scanOldJson() {
         JSONParser parser = new JSONParser();
         try {
             Object rootObject = parser.parse(new FileReader("src/main/resources/json/oldIsotopes.json"));
@@ -218,7 +218,7 @@ public class JsonReader {
     /**
      * This Method reads the compacted json file and fills the isotopeSet with Isotope objects (without emerging isotopes)
      */
-    private void scannJson() {
+    private void scanJson() {
         JSONParser parser = new JSONParser();
         try {
             Object rootObject = parser.parse(new FileReader("src/main/resources/json/newIsotopes.json"));
@@ -348,7 +348,7 @@ public class JsonReader {
      * @return isotopeSet
      */
     public Set<Isotope> getIsotopeSet() {
-        scannJson();
+        scanJson();
         giveEmergingIsotopes();
         return isotopeSet;
     }
