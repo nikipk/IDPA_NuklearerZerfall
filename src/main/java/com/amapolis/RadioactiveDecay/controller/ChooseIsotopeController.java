@@ -23,6 +23,7 @@ public class ChooseIsotopeController implements Initializable {
 
     private Set<Isotope> isotopeSet;
     private ObservableList<IsotopeOptionTableElement> shownOptions;
+    private MainWindowController mainWindowController;
 
     @FXML
     private TableView<IsotopeOptionTableElement> optionTable;
@@ -120,6 +121,10 @@ public class ChooseIsotopeController implements Initializable {
             unsortedIsotopeList.remove(topOption);
         }
         return sortedIsotopeList;
+    }
+
+    public void setMainWindowController(MainWindowController mainWindowController) {
+        this.mainWindowController = mainWindowController;
     }
 
     @Override

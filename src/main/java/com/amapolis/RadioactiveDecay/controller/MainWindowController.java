@@ -79,6 +79,8 @@ public class MainWindowController implements Initializable {
             log.debug("Loading FXML for main view from: {}", fxmlFile);
             FXMLLoader loader = new FXMLLoader();
             Parent rootNode = loader.load(getClass().getResourceAsStream(fxmlFile));
+            ChooseIsotopeController chooseIsotopeController = loader.getController();
+            chooseIsotopeController.setMainWindowController(this);
 
             log.debug("Showing JFX scene");
             Scene scene = new Scene(rootNode);
@@ -88,9 +90,6 @@ public class MainWindowController implements Initializable {
             stage.setTitle("Radioactive decay calculator");
             stage.setScene(scene);
             stage.show();
-
-
-
     }
 
     @FXML
@@ -155,11 +154,11 @@ public class MainWindowController implements Initializable {
         alert.show();
     }
 
-    public void addIsotopesToList(Collection<IsotopeTableElement> isotopesPara){
+    public void addIsotopesToTable(Collection<IsotopeTableElement> isotopesPara){
         isotopes.addAll(isotopesPara);
     }
 
-    public void addIsotopeToList(IsotopeTableElement isotopePara){
+    public void addIsotopeToTable(IsotopeTableElement isotopePara){
         isotopes.add(isotopePara);
     }
 }
