@@ -123,7 +123,6 @@ public class MainWindowController implements Initializable {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            System.out.println("CALC");
                             isotopeSeries.get(i).getData().add(new XYChart.Data<Number, Number>(time, isotopes.get(i)));
                         }
                     });

@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
  */
 public class DecayCalculator {
     //Defines what is considered nothing (lower more precise but slower)
+    //todo zeroTolerance should be variable to amount of isotopes
     private double zeroTolerance;
     //Callback for each time step
     private IsotopeProgressListener isotopeProgressListener;
