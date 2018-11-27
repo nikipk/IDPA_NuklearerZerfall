@@ -1,7 +1,7 @@
 package com.amapolis.RadioactiveDecay.model;
 
 import com.amapolis.RadioactiveDecay.model.isotope.Isotope;
-import com.amapolis.RadioactiveDecay.model.json.JsonReader;
+import com.amapolis.RadioactiveDecay.model.json.JsonFormatter;
 
 import java.util.Set;
 
@@ -14,7 +14,7 @@ public class IsotopeSetManager {
     private Set<Isotope> isotopeSet;
 
     public IsotopeSetManager() {
-        JsonReader jsonReader = new JsonReader();
+        JsonFormatter jsonReader = new JsonFormatter();
         this.isotopeSet = jsonReader.getIsotopeSet();
     }
 

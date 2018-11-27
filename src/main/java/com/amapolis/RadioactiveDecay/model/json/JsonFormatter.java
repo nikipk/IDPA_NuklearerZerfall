@@ -30,13 +30,13 @@ import org.json.simple.parser.ParseException;
 /**
  * This class reads a json file, generates a set of all isotopes and adds emerging isotopes
  */
-public class JsonReader {
+public class JsonFormatter {
 
     private Set<Isotope> isotopeSet;
     private ArrayList<String> idList;
     private ArrayList<String> elementNameList;
 
-    public JsonReader() {
+    public JsonFormatter() {
         isotopeSet = new HashSet<>();
         idList = new ArrayList<>();
         elementNameList = new ArrayList<>();
@@ -89,11 +89,11 @@ public class JsonReader {
                 }
             }
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(JsonReader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JsonFormatter.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(JsonReader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JsonFormatter.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParseException ex) {
-            Logger.getLogger(JsonReader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JsonFormatter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -173,7 +173,7 @@ public class JsonReader {
     }
 
     /**
-     * This method writes a compact version of the original json file witj only relevant information
+     * This method writes a compact version of the original json file with only relevant information
      */
     private void writeNewJson() {
         JSONObject root = new JSONObject();
@@ -243,11 +243,11 @@ public class JsonReader {
                 }
             }
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(JsonReader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JsonFormatter.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(JsonReader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JsonFormatter.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParseException ex) {
-            Logger.getLogger(JsonReader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JsonFormatter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -323,7 +323,7 @@ public class JsonReader {
     }
 
     /**
-     *This method removes isotopes from the isotopeSet which don't decay to a known isotope
+     * This method removes isotopes from the isotopeSet which don't decay to a known isotope
      */
     private void cleanDecayTrace() {
         Set<Isotope> uncertainIsotopes = new HashSet<>();
@@ -353,11 +353,5 @@ public class JsonReader {
         scanJson();
         giveEmergingIsotopes();
         return isotopeSet;
-    }
-
-    public static void main(String[] args){
-        JsonReader jsr = new JsonReader();
-        jsr.getIsotopeSet();
-        jsr.printDecayTrace();
     }
 }
