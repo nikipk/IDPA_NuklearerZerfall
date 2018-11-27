@@ -21,7 +21,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
+import javafx.util.converter.DoubleStringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,6 +170,8 @@ public class MainWindowController implements Initializable {
         massCol.setCellValueFactory(new PropertyValueFactory<IsotopeTableElement, Integer>("atomicMass"));
         halfLifeCol.setCellValueFactory(new PropertyValueFactory<IsotopeTableElement, Double>("halfTimeInS"));
         amountCol.setCellValueFactory(new PropertyValueFactory<IsotopeTableElement, Double>("amount"));
+        //todo make amount editable in table, => doesn't work (disabled edit in fxml too)
+        //amountCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
         decayTypeCol.setCellValueFactory(new PropertyValueFactory<IsotopeTableElement, String>("decayType"));
 
     }

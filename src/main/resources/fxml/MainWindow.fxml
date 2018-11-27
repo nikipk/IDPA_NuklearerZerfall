@@ -52,7 +52,7 @@
                   <TableColumn fx:id="massCol" editable="false" prefWidth="65.0" text="Mass" />
                   <TableColumn fx:id="decayTypeCol" editable="false" prefWidth="75.0" text="Decay type" />
                   <TableColumn fx:id="halfLifeCol" editable="false" prefWidth="75.0" text="Half life in s" />
-                  <TableColumn fx:id="amountCol" prefWidth="75.0" text="Amount" />
+                  <TableColumn fx:id="amountCol" editable="false" prefWidth="75.0" text="Amount" />
               </columns>
                <columnResizePolicy>
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
