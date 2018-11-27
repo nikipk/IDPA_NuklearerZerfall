@@ -48,6 +48,7 @@ public class JsonFormatter {
     private void scanOldJson() {
         JSONParser parser = new JSONParser();
         try {
+            //todo maybe use getClass().getResourceAsStream(FILE)
             Object rootObject = parser.parse(new FileReader("src/main/resources/json/oldIsotopes.json"));
             JSONObject root = (JSONObject) rootObject;
 
@@ -221,6 +222,7 @@ public class JsonFormatter {
     private void scanJson() {
         JSONParser parser = new JSONParser();
         try {
+            //todo maybe use getClass().getResourceAsStream(fxmlFile)
             Object rootObject = parser.parse(new FileReader("src/main/resources/json/newIsotopes.json"));
             JSONObject root = (JSONObject) rootObject;
             JSONArray isotopeArray = (JSONArray) root.get("isotopes");
