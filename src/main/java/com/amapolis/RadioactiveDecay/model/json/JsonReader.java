@@ -347,7 +347,7 @@ public class JsonReader {
      *
      * @return isotopeList
      */
-    public Set<Isotope> getIsotopeList() {
+    public Set<Isotope> getIsotopeSet() {
         scannJson();
         giveEmergingIsotopes();
         return isotopeList;
@@ -355,7 +355,7 @@ public class JsonReader {
 
     public static void main(String[] args){
         JsonReader jsr = new JsonReader();
-        jsr.getIsotopeList();
+        jsr.getIsotopeSet();
         jsr.printDecayTrace();
     }
 }

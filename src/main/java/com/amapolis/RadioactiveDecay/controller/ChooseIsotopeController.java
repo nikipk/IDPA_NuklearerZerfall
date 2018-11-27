@@ -1,5 +1,6 @@
 package com.amapolis.RadioactiveDecay.controller;
 
+import com.amapolis.RadioactiveDecay.model.IsotopeSetManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -34,7 +35,7 @@ public class ChooseIsotopeController implements Initializable {
 
     /*
     public ChooseIsotopeController() {
-        isotopeSet = new JsonReader().getIsotopeList();
+        isotopeSet = new JsonReader().getIsotopeSet();
 
         double start = System.currentTimeMillis();
         ArrayList<Isotope> testList = getOptionList("u");
@@ -123,13 +124,9 @@ public class ChooseIsotopeController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        isotopeSet = new JsonReader().getIsotopeList();
+        isotopeSet = IsotopeSetManager.getInstance().getIsotopeSet();
         shownOptions = FXCollections.observableArrayList();
         optionTable.setItems(shownOptions);
         optionCol.setCellValueFactory(new PropertyValueFactory<IsotopeOptionTableElement, String>("id"));
-    }
-
-    public static void main(String[] args) throws Exception {
-        ChooseIsotopeController cic = new ChooseIsotopeController();
     }
 }

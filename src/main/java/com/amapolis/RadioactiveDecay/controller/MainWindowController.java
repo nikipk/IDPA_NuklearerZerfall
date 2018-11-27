@@ -2,6 +2,7 @@ package com.amapolis.RadioactiveDecay.controller;
 
 import com.amapolis.RadioactiveDecay.model.DecayCalculator;
 import com.amapolis.RadioactiveDecay.model.isotope.DecayType;
+import com.amapolis.RadioactiveDecay.model.isotope.Isotope;
 import com.amapolis.RadioactiveDecay.model.isotope.StableIsotope;
 import com.amapolis.RadioactiveDecay.model.isotope.UnstableIsotope;
 import javafx.collections.FXCollections;
@@ -152,5 +153,13 @@ public class MainWindowController implements Initializable {
         alert.setHeaderText(title);
         alert.setContentText(message);
         alert.show();
+    }
+
+    public void addIsotopesToList(Collection<IsotopeTableElement> isotopesPara){
+        isotopes.addAll(isotopesPara);
+    }
+
+    public void addIsotopeToList(IsotopeTableElement isotopePara){
+        isotopes.add(isotopePara);
     }
 }
