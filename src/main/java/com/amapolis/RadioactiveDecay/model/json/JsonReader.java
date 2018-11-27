@@ -48,7 +48,7 @@ public class JsonReader {
     private void scannOldJson() {
         JSONParser parser = new JSONParser();
         try {
-            Object rootObject = parser.parse(new FileReader("../IDPA_RadioactiveDecay/src/main/resources/json/oldIsotopes.json"));
+            Object rootObject = parser.parse(new FileReader("src/main/resources/json/oldIsotopes.json"));
             JSONObject root = (JSONObject) rootObject;
 
             JSONArray isotopeArray = (JSONArray) root.get("nucs");
@@ -208,7 +208,7 @@ public class JsonReader {
         root.put("ids", idArray);
         root.put("elementnames", elementNameArray);
         try {
-            Files.write(Paths.get("../IDPA_RadioactiveDecay/src/main/resources/json/newIsotopes.json"), root.toJSONString().getBytes());
+            Files.write(Paths.get("src/main/resources/json/newIsotopes.json"), root.toJSONString().getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -221,7 +221,7 @@ public class JsonReader {
     private void scannJson() {
         JSONParser parser = new JSONParser();
         try {
-            Object rootObject = parser.parse(new FileReader("../IDPA_RadioactiveDecay/src/main/resources/json/newIsotopes.json"));
+            Object rootObject = parser.parse(new FileReader("src/main/resources/json/newIsotopes.json"));
             JSONObject root = (JSONObject) rootObject;
             JSONArray isotopeArray = (JSONArray) root.get("isotopes");
             JSONArray nameArray = (JSONArray) root.get("elementnames");
