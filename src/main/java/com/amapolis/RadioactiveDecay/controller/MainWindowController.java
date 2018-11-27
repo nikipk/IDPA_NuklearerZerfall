@@ -8,16 +8,21 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,10 +66,30 @@ public class MainWindowController implements Initializable {
     private TextField precisionLevel;
 
     @FXML
-    private void handleButtonAdd(ActionEvent ae){
+    private void handleButtonAdd(ActionEvent ae) throws IOException{
         log.info("Add button clicked!");
         isotopes.add(new IsotopeTableElement(new UnstableIsotope("asd", "sadasd", 12, 12, DecayType.BETA_MINUS, 120.2), 10.0));
         isotopes.add(new IsotopeTableElement(new StableIsotope("asd", "sadasd", 12, 12), 10.0));
+
+
+
+            Stage stage = new Stage();
+            String fxmlFile = "/fxml/ChooseIsotope.fxml";
+            log.debug("Loading FXML for main view from: {}", fxmlFile);
+            FXMLLoader loader = new FXMLLoader();
+            Parent rootNode = loader.load(getClass().getResourceAsStream(fxmlFile));
+
+            log.debug("Showing JFX scene");
+            Scene scene = new Scene(rootNode);
+            //scene.getStylesheets().add("/styles/styles.css");
+            //todo set Icon
+
+            stage.setTitle("Radioactive decay calculator");
+            stage.setScene(scene);
+            stage.show();
+
+
+
     }
 
     @FXML

@@ -1,5 +1,8 @@
 package com.amapolis.RadioactiveDecay.controller;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 
 import java.net.URL;
@@ -9,11 +12,21 @@ import java.util.Set;
 
 import com.amapolis.RadioactiveDecay.model.isotope.Isotope;
 import com.amapolis.RadioactiveDecay.model.json.JsonReader;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 
 public class ChooseIsotopeController implements Initializable {
 
     private Set<Isotope> isotopeSet;
+    private ObservableList<IsotopeOptionTableElement> shownOptions;
 
+    @FXML
+    private TableView<IsotopeOptionTableElement> optionTable;
+
+    @FXML
+    private TableColumn<IsotopeOptionTableElement, String> optionCol;
+
+    /*
     public ChooseIsotopeController() {
         isotopeSet = new JsonReader().getIsotopeList(); //TODO only temporary
 
@@ -34,6 +47,12 @@ public class ChooseIsotopeController implements Initializable {
         System.out.println("t3: "+(System.currentTimeMillis()-start));
 
         System.out.println("done");
+    }
+    */
+
+    @FXML
+    private void clearTable(){
+
     }
 
     public ArrayList<Isotope> getOptionList(String inputString) {
@@ -84,7 +103,9 @@ public class ChooseIsotopeController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
+        isotopeSet = new JsonReader().getIsotopeList();
+        shownOptions = FXCollections.observableArrayList();
+        optionTable.setItems(shownOptions);
     }
 
     public static void main(String[] args) throws Exception {
