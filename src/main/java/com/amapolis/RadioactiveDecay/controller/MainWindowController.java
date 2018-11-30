@@ -1,14 +1,16 @@
 package com.amapolis.RadioactiveDecay.controller;
 
 import com.amapolis.RadioactiveDecay.model.DecayCalculator;
+import com.amapolis.RadioactiveDecay.model.IsotopeProgressListener;
 import com.amapolis.RadioactiveDecay.model.exception.InvalidIsotopeException;
-import com.amapolis.RadioactiveDecay.model.isotope.DecayType;
+import com.amapolis.RadioactiveDecay.model.exception.NegativeIsotopeAmountInApproachCalculationException;
 import com.amapolis.RadioactiveDecay.model.isotope.Isotope;
-import com.amapolis.RadioactiveDecay.model.isotope.StableIsotope;
-import com.amapolis.RadioactiveDecay.model.isotope.UnstableIsotope;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,9 +23,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
-import javafx.util.converter.DoubleStringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +33,9 @@ import java.util.*;
 
 
 public class MainWindowController implements Initializable {
+    //todo clicking on eXit should also close the background thread
     private static final Logger log = LoggerFactory.getLogger(MainWindowController.class);
     private Collection<XYChart.Series<Number, Number>> lineChartSeries;
-    private DecayCalculator decayCalculator;
     private ObservableList<IsotopeTableElement> isotopesInTable;
 
     @FXML
@@ -106,20 +106,17 @@ public class MainWindowController implements Initializable {
     private void handleButtonCalculateExact(ActionEvent ae) {
         log.info("CalculateExact button clicked!");
         try {
+            DecayCalculator decayCalculator = new DecayCalculator();
+
             Map<Isotope, Double> initialIsotope = tableElementsToMap(isotopesInTable);
             Set<Isotope> allOccurringIsotopes = decayCalculator.getAllOccurringIsotopes(initialIsotope.keySet());
 
-            LinkedHashMap<Isotope, XYChart.Series> isotopeSeries = new LinkedHashMap<>();
+            Map<Isotope, XYChart.Series> isotopeSeries = new LinkedHashMap<>();
 
-            for(Isotope isotope:allOccurringIsotopes){
-                XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
-                series.setName(isotope.getId());
-                lineChart.getData().add(series);
-                isotopeSeries.put(isotope, series);
-            }
+            addIsotopeSeriesToGraph(allOccurringIsotopes, isotopeSeries);
 
             decayCalculator.setIsotopeProgressListener((time, isotopes) -> {
-                for (Isotope i:isotopes.keySet()) {
+                for (Isotope i : isotopes.keySet()) {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
@@ -133,6 +130,7 @@ public class MainWindowController implements Initializable {
             decayCalculator.getIsotopeTimeLineExact(precision, initialIsotope);
 
         } catch (InvalidIsotopeException e) {
+            //todo exception handling
             e.printStackTrace();
         }
     }
@@ -140,9 +138,83 @@ public class MainWindowController implements Initializable {
     @FXML
     private void handleButtonCalculateApproach(ActionEvent ae) {
         log.info("CalculateApproach button clicked!");
-        try{
-        }catch (Exception e){
+        try {
+            DecayCalculator decayCalculator = new DecayCalculator();
 
+            //get declared precision level //todo can maybe be shorted
+            final double precision = Double.parseDouble(precisionLevel.getText());
+
+            //converts the table isotope element to a map
+            Map<Isotope, Double> initialIsotope = tableElementsToMap(isotopesInTable);
+            //get a set with all occurring isotopes (not a isotope two times)
+            Set<Isotope> allOccurringIsotopes = decayCalculator.getAllOccurringIsotopes(initialIsotope.keySet());
+
+            //one XYChart.Series for each isotope
+            Map<Isotope, XYChart.Series> isotopeSeries = new LinkedHashMap<>();
+
+            //adds for each isotope the same instance to the line chart and the map
+            addIsotopeSeriesToGraph(allOccurringIsotopes, isotopeSeries);
+
+            Task backgroundTask = new Task<Object>() {
+                @Override
+                protected Object call() {
+                    try {
+                        decayCalculator.setIsotopeProgressListener(new IsotopeProgressListener() {
+                            @Override
+                            public void onProgress(double time, Map<Isotope, Double> isotopes) {
+                                TimeIsotope isotope = new TimeIsotope(time, isotopes);
+                                updateValue(isotope);
+                                try {
+                                    Thread.sleep(1);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+
+                        decayCalculator.getIsotopeTimeLineApproach(precision, initialIsotope);
+
+                    } catch (InvalidIsotopeException e) {
+                        e.printStackTrace();
+                        //todo error handling
+                    } catch (NegativeIsotopeAmountInApproachCalculationException e) {
+                        e.printStackTrace();
+                        //todo error handling
+                    } finally {
+                        return null;
+                    }
+                }
+            };
+            new Thread(backgroundTask).start();
+            backgroundTask.valueProperty().addListener(new ChangeListener() {
+                @Override
+                public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                    if (newValue != null) {
+                        TimeIsotope timeIsotope = (TimeIsotope) newValue;
+                        for (Isotope iso : timeIsotope.getIsotopes().keySet()) {
+                            isotopeSeries.get(iso).getData().add(new XYChart.Data<Number, Number>(timeIsotope.getTime(), timeIsotope.getIsotopes().get(iso)));
+                        }
+                    }
+                }
+            });
+        } catch (InvalidIsotopeException e) {
+            e.printStackTrace();
+            //todo error handling
+        }
+    }
+
+    /**
+     * adds for each isotope the same instance to the line chart and the map
+     *
+     * @param allOccurringIsotopes
+     * @param isotopeSeries
+     */
+    private void addIsotopeSeriesToGraph(Set<Isotope> allOccurringIsotopes, Map<Isotope, XYChart.Series> isotopeSeries) {
+        for (Isotope isotope : allOccurringIsotopes) {
+            XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
+            series.setName(isotope.getId());
+            lineChart.getData().add(series);
+            isotopeSeries.put(isotope, series);
         }
     }
 
@@ -150,6 +222,7 @@ public class MainWindowController implements Initializable {
     private void handleButtonClearGraph(ActionEvent ae) {
         log.info("ClearGraph button clicked!");
         //todo maybe better method
+        //todo cancle running threads
         lineChart.getData().setAll();
     }
 
@@ -159,7 +232,6 @@ public class MainWindowController implements Initializable {
 
         lineChart.setCreateSymbols(false);
 
-        decayCalculator = new DecayCalculator();
         lineChartSeries = new ArrayList<>();
         isotopesInTable = FXCollections.observableArrayList();
         isotopeTable.setItems(isotopesInTable);
@@ -185,18 +257,20 @@ public class MainWindowController implements Initializable {
         alert.show();
     }
 
+    //todo change that normal isotope and amount
     public void addIsotopesToTable(Collection<IsotopeTableElement> isotopesPara) {
         isotopesInTable.addAll(isotopesPara);
     }
 
+    //todo change that normal isotope and amount
     public void addIsotopeToTable(IsotopeTableElement isotopePara) {
         isotopesInTable.add(isotopePara);
     }
 
-    private Map<Isotope, Double> tableElementsToMap(Collection<IsotopeTableElement> isotopeTableElements){
+    private Map<Isotope, Double> tableElementsToMap(Collection<IsotopeTableElement> isotopeTableElements) {
         Map<Isotope, Double> returnMap = new LinkedHashMap<>();
-        for(IsotopeTableElement isotopeTableElement: isotopeTableElements){
-            if(returnMap.containsKey(isotopeTableElement.getIsotope())){
+        for (IsotopeTableElement isotopeTableElement : isotopeTableElements) {
+            if (returnMap.containsKey(isotopeTableElement.getIsotope())) {
                 returnMap.put(isotopeTableElement.getIsotope(), returnMap.get(isotopeTableElement.getIsotope()) + isotopeTableElement.getAmount());
             } else {
                 returnMap.put(isotopeTableElement.getIsotope(), isotopeTableElement.getAmount());

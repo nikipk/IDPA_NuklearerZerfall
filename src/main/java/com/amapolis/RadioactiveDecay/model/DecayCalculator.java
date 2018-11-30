@@ -134,7 +134,9 @@ public class DecayCalculator {
      * @throws NegativeIsotopeAmountInApproachCalculationException
      */
     public Map<Isotope, Double> getIsotopesAtTimeApproach(Isotope initialIsotope, double amountIsotope, double timeLastStep, double timeCurrently) throws InvalidIsotopeException, NegativeIsotopeAmountInApproachCalculationException {
-        if(amountIsotope < 0){
+        if(amountIsotope <= 0) {
+            //todo set on 0 but doesn't work yet
+            //amountIsotope = 0;
             throw new NegativeIsotopeAmountInApproachCalculationException(amountIsotope);
         }
         Map<Isotope, Double> returnIsotopes = new LinkedHashMap<Isotope, Double>();
