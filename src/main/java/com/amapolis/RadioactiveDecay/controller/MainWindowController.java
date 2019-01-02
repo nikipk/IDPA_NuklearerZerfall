@@ -66,7 +66,7 @@ public class MainWindowController implements Initializable {
     private BarChart barChart;
 
     @FXML
-    private TextField precisionLevel;
+    private TextField precisionLevel, timeout;
 
     @FXML
     private void handleButtonAdd(ActionEvent ae) throws IOException {
@@ -143,10 +143,13 @@ public class MainWindowController implements Initializable {
 
             //get declared precision level //todo can maybe be shorted
             final double precision = Double.parseDouble(precisionLevel.getText());
+            //get declared timeout between timestep
+            final int timeoutInNs = Integer.parseInt(timeout.getText());
 
             //converts the table isotope element to a map
             Map<Isotope, Double> initialIsotope = tableElementsToMap(isotopesInTable);
             //get a set with all occurring isotopes (not a isotope two times)
+            //todo maybe make this method static
             Set<Isotope> allOccurringIsotopes = decayCalculator.getAllOccurringIsotopes(initialIsotope.keySet());
 
             //one XYChart.Series for each isotope
@@ -159,13 +162,16 @@ public class MainWindowController implements Initializable {
                 @Override
                 protected Object call() {
                     try {
+                        DecayCalculator decayCalculator = new DecayCalculator();
+
                         decayCalculator.setIsotopeProgressListener(new IsotopeProgressListener() {
                             @Override
                             public void onProgress(double time, Map<Isotope, Double> isotopes) {
                                 TimeIsotope isotope = new TimeIsotope(time, isotopes);
                                 updateValue(isotope);
                                 try {
-                                    Thread.sleep(1);
+                                    //todo timeout in ns not sure if this works
+                                    Thread.sleep(0, timeoutInNs);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }

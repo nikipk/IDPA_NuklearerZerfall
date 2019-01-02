@@ -106,12 +106,14 @@ public class DecayCalculator {
      * @throws InvalidIsotopeException
      */
     public Map<Isotope, Double> getIsotopesAtTimeExact(Map<Isotope, Double> initialIsotopes, double time, Set<Isotope> allOccurringIsotopes) throws InvalidIsotopeException {
+        //to not override existing values! if we just use put it would override the value each time
         Map<Isotope, Double> returnIsotopes = allOccurringIsotopes.stream().collect(Collectors.toMap(Function.identity(), p -> 0.0));
 
         for (Isotope initialIsotope : initialIsotopes.keySet()) {
             Map<Isotope, Double> tmpIsotopes = getIsotopesAtTimeExact(initialIsotope, initialIsotopes.get(initialIsotope), time);
 
             for (Isotope i : tmpIsotopes.keySet()) {
+                //todo shorten
                 //add values
                 double newAmount = returnIsotopes.get(i) + tmpIsotopes.get(i);
                 returnIsotopes.put(i, newAmount);
@@ -123,7 +125,7 @@ public class DecayCalculator {
 
     /**
      * This Method calculates the approaching radioactive decay and the resulting Isotopes of a single Isotope
-     * Please make sure that precision level is enough high or this function will return a bad value
+     * Please make sure that precision level is enough high or this function will return a imprecise value
      *
      * @param initialIsotope
      * @param amountIsotope
@@ -134,11 +136,11 @@ public class DecayCalculator {
      * @throws NegativeIsotopeAmountInApproachCalculationException
      */
     public Map<Isotope, Double> getIsotopesAtTimeApproach(Isotope initialIsotope, double amountIsotope, double timeLastStep, double timeCurrently) throws InvalidIsotopeException, NegativeIsotopeAmountInApproachCalculationException {
-        if(amountIsotope <= 0) {
-            //todo set on 0 but doesn't work yet
-            //amountIsotope = 0;
+
+        if(amountIsotope < 0.0) {
             throw new NegativeIsotopeAmountInApproachCalculationException(amountIsotope);
         }
+
         Map<Isotope, Double> returnIsotopes = new LinkedHashMap<Isotope, Double>();
 
         if (initialIsotope.getDecayType().isStable()) {
@@ -152,6 +154,10 @@ public class DecayCalculator {
                 throw new InvalidIsotopeException();
             }
             double amountAfterTime = amountIsotope - (amountIsotope * unstableIsotope.getApproachValue() * (timeCurrently - timeLastStep));
+            //make sure no sub zero value fucks up the algorithm
+            if(amountAfterTime < 0.0){
+                amountAfterTime = 0.0;
+            }
             returnIsotopes.put(initialIsotope, amountAfterTime);
 
             returnIsotopes.putAll(getIsotopesAtTimeApproach(unstableIsotope.getEmergingIsotope(), amountIsotope - amountAfterTime, timeLastStep, timeCurrently));
@@ -171,13 +177,13 @@ public class DecayCalculator {
      * @throws NegativeIsotopeAmountInApproachCalculationException
      */
     public Map<Isotope, Double> getIsotopesAtTimeApproach(Map<Isotope, Double> initialIsotopes, double timeLastStep, double timeCurrently, Set<Isotope> allOccurringIsotopes) throws InvalidIsotopeException, NegativeIsotopeAmountInApproachCalculationException {
+        //to not override existing values! if we just use put it would override the value each time
         Map<Isotope, Double> returnIsotopes = allOccurringIsotopes.stream().collect(Collectors.toMap(Function.identity(), p -> 0.0));
 
         for (Isotope initialIsotope : initialIsotopes.keySet()) {
             Map<Isotope, Double> tmpIsotopes = getIsotopesAtTimeApproach(initialIsotope, initialIsotopes.get(initialIsotope), timeLastStep, timeCurrently);
 
             for (Isotope i : tmpIsotopes.keySet()) {
-                //add values
                 double newAmount = returnIsotopes.get(i) + tmpIsotopes.get(i);
                 returnIsotopes.put(i, newAmount);
             }
@@ -245,9 +251,7 @@ public class DecayCalculator {
         //calculate until "nothing" is left for progress
         //if all isotopes are stable
         if (longestDecayingIsotope == null) {
-            timeLine.put(0.0, initialIsotopes);
-            isotopeProgressListener.onProgress(0.0, initialIsotopes);
-            return timeLine;
+            return getStableIsotopeTimeLine(timeLine, initialIsotopes);
         } else {
             double time = 0;
             boolean calculating = true;
@@ -289,9 +293,7 @@ public class DecayCalculator {
         //calculate until "nothing" is left for progress
         //if all isotopes are stable
         if (longestDecayingIsotope == null) {
-            timeLine.put(0.0, initialIsotopes);
-            isotopeProgressListener.onProgress(0.0, initialIsotopes);
-            return timeLine;
+            return getStableIsotopeTimeLine(timeLine, initialIsotopes);
         } else {
             double timeLastStep = 0;
             double time = 0;
@@ -423,5 +425,13 @@ public class DecayCalculator {
 
     public IsotopeProgressListener getIsotopeProgressListener() {
         return isotopeProgressListener;
+    }
+
+    private Map<Double, Map<Isotope, Double>> getStableIsotopeTimeLine(Map<Double, Map<Isotope, Double>> timeLine, Map<Isotope, Double> initialIsotopes){
+        timeLine.put(0.0, initialIsotopes);
+        isotopeProgressListener.onProgress(0.0, initialIsotopes);
+        timeLine.put(0.1, initialIsotopes);
+        isotopeProgressListener.onProgress(0.1, initialIsotopes);
+        return timeLine;
     }
 }
