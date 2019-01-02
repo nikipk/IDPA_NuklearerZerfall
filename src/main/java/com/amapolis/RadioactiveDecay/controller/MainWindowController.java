@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class MainWindowController implements Initializable {
@@ -66,7 +67,7 @@ public class MainWindowController implements Initializable {
     private BarChart barChart;
 
     @FXML
-    private TextField precisionLevel, timeout;
+    private TextField precisionLevel, timeoutInNs, timeoutInMs;
 
     @FXML
     private void handleButtonAdd(ActionEvent ae) throws IOException {
@@ -142,9 +143,10 @@ public class MainWindowController implements Initializable {
             DecayCalculator decayCalculator = new DecayCalculator();
 
             //get declared precision level //todo can maybe be shorted
-            final double precision = Double.parseDouble(precisionLevel.getText());
+            final AtomicInteger precision = new AtomicInteger(Integer.parseInt(precisionLevel.getText()));
             //get declared timeout between timestep
-            final int timeoutInNs = Integer.parseInt(timeout.getText());
+            final AtomicInteger timeStepInMs = new AtomicInteger(Integer.parseInt(timeoutInMs.getText()));
+            final AtomicInteger timeStepInNs = new AtomicInteger(Integer.parseInt(timeoutInNs.getText()));
 
             //converts the table isotope element to a map
             Map<Isotope, Double> initialIsotope = tableElementsToMap(isotopesInTable);
@@ -162,8 +164,6 @@ public class MainWindowController implements Initializable {
                 @Override
                 protected Object call() {
                     try {
-                        DecayCalculator decayCalculator = new DecayCalculator();
-
                         decayCalculator.setIsotopeProgressListener(new IsotopeProgressListener() {
                             @Override
                             public void onProgress(double time, Map<Isotope, Double> isotopes) {
@@ -171,15 +171,14 @@ public class MainWindowController implements Initializable {
                                 updateValue(isotope);
                                 try {
                                     //todo timeout in ns not sure if this works
-                                    Thread.sleep(0, timeoutInNs);
+                                    Thread.sleep(timeStepInMs.get(), timeStepInNs.get());
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
                             }
                         });
 
-                        decayCalculator.getIsotopeTimeLineApproach(precision, initialIsotope);
-
+                        decayCalculator.getIsotopeTimeLineApproach(precision.doubleValue(), initialIsotope);
                     } catch (InvalidIsotopeException e) {
                         e.printStackTrace();
                         //todo error handling

@@ -84,12 +84,23 @@
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                      </HBox.margin>
                   </TextField>
-                  <Label text="Timeout between timestep in nanoseconds:">
+                  <Label text="Timeout between timestep:">
                      <HBox.margin>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                      </HBox.margin>
                   </Label>
-                  <TextField fx:id="timeout" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="80.0" text="100">
+                  <Label text="Ms:" />
+                  <TextField fx:id="timeoutInMs" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="80.0" text="10">
+                     <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </HBox.margin>
+                  </TextField>
+                  <Label text="ns:">
+                     <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <TextField fx:id="timeoutInNs" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="80.0" text="0">
                      <HBox.margin>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                      </HBox.margin>
