@@ -74,7 +74,7 @@ public class ChooseIsotopeController implements Initializable {
     private void selectIsotope(ActionEvent ae){
         Isotope selectedIsotope = optionTable.getSelectionModel().getSelectedItem();
         double amount = Double.parseDouble(amountField.getText());
-        mainWindowController.addIsotopeToTable(new IsotopeTableElement(selectedIsotope, amount));
+        mainWindowController.addIsotopeToTable(selectedIsotope, amount);
         System.out.println(amount+" atoms of the isotope "+selectedIsotope.getId()+ " selected");
         ((Stage) optionTable.getScene().getWindow()).close();
     }

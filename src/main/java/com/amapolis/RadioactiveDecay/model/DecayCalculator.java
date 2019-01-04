@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
  */
 public class DecayCalculator {
     //Defines what is considered nothing (lower more precise but slower)
-    //todo zeroTolerance should be variable to amount of isotopes
     private double zeroTolerance;
     //Callback for each time step
     private IsotopeProgressListener isotopeProgressListener;
@@ -113,10 +112,9 @@ public class DecayCalculator {
             Map<Isotope, Double> tmpIsotopes = getIsotopesAtTimeExact(initialIsotope, initialIsotopes.get(initialIsotope), time);
 
             for (Isotope i : tmpIsotopes.keySet()) {
-                //todo shorten
-                //add values
-                double newAmount = returnIsotopes.get(i) + tmpIsotopes.get(i);
-                returnIsotopes.put(i, newAmount);
+                //add values (if multiple isotopes have the same emerging isotope)
+                //double newAmount = returnIsotopes.get(i) + tmpIsotopes.get(i);
+                returnIsotopes.put(i,  returnIsotopes.get(i) + tmpIsotopes.get(i));
             }
         }
 
