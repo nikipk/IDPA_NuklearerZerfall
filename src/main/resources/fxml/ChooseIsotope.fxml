@@ -14,12 +14,12 @@
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.amapolis.RadioactiveDecay.controller.ChooseIsotopeController">
    <top>
-      <Label prefHeight="63.0" prefWidth="787.0" text="Choose an initial isotope" BorderPane.alignment="CENTER">
+      <Label text="Choose an initial isotope" BorderPane.alignment="CENTER_LEFT">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
          <BorderPane.margin>
-            <Insets left="20.0" right="20.0" />
+            <Insets left="20.0" right="20.0" top="20.0" />
          </BorderPane.margin>
       </Label>
    </top>

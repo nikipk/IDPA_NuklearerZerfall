@@ -243,7 +243,6 @@ public class DecayCalculator {
         Map<Double, Map<Isotope, Double>> timeLine = new LinkedHashMap<>();
 
         //find Isotope with longest decay time
-        //todo can maybe be shortend
         Set<Isotope> allOccurringIsotopes = getAllOccurringIsotopes(initialIsotopes.keySet());
         UnstableIsotope longestDecayingIsotope = findLongestDecayingIsotope(allOccurringIsotopes);
         //calculate until "nothing" is left for progress
@@ -285,7 +284,6 @@ public class DecayCalculator {
         Map<Double, Map<Isotope, Double>> timeLine = new LinkedHashMap<>();
 
         //find Isotope with longest decay time
-        //todo can maybe be shortend
         Set<Isotope> allOccurringIsotopes = getAllOccurringIsotopes(initialIsotopes.keySet());
         UnstableIsotope longestDecayingIsotope = findLongestDecayingIsotope(allOccurringIsotopes);
         //calculate until "nothing" is left for progress
@@ -390,25 +388,9 @@ public class DecayCalculator {
     }
 
     /**
-     * This method calculates the time until (or almost) "nothing" is left
-     *
-     * @param isotope
-     * @return
+     * The isotopeProgressListener is executed every time the timeline calculates a new result for a given time
+     * @param isotopeProgressListener
      */
-    private double timeUntilNothingLeft(UnstableIsotope isotope) {
-        //todo doesnt work
-        // N = Anzahl Atome nach t Zeit
-        // a = Anfangsbestand
-        // m = Zerfallsfaktor
-        // t = Zeit
-        // h = Halbwertszeit
-
-        // N = a * m^t
-        // => ≈0 = m^t
-        // => t = Log(≈0)/Log(m)
-        return Math.log(zeroTolerance) / Math.log(isotope.getDecayFactor());
-    }
-
     public void setIsotopeProgressListener(IsotopeProgressListener isotopeProgressListener) {
         this.isotopeProgressListener = isotopeProgressListener;
     }
@@ -417,6 +399,10 @@ public class DecayCalculator {
         return zeroTolerance;
     }
 
+    /**
+     * This option decides which amount of isotopes is considered as 0. This is because no amount of isotopes can reach 0 due to the exponential calculation.
+     * @param zeroTolerance
+     */
     public void setZeroTolerance(double zeroTolerance) {
         this.zeroTolerance = zeroTolerance;
     }
@@ -425,6 +411,12 @@ public class DecayCalculator {
         return isotopeProgressListener;
     }
 
+    /**
+     * Returns a small timeline for stable isotopes. This is because the application should display a straight line and not only a dot.
+     * @param timeLine
+     * @param initialIsotopes
+     * @return
+     */
     private Map<Double, Map<Isotope, Double>> getStableIsotopeTimeLine(Map<Double, Map<Isotope, Double>> timeLine, Map<Isotope, Double> initialIsotopes){
         timeLine.put(0.0, initialIsotopes);
         isotopeProgressListener.onProgress(0.0, initialIsotopes);
