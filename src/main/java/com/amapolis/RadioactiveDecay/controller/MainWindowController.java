@@ -5,7 +5,7 @@ import com.amapolis.RadioactiveDecay.model.IsotopeProgressListener;
 import com.amapolis.RadioactiveDecay.model.exception.InvalidIsotopeException;
 import com.amapolis.RadioactiveDecay.model.exception.NegativeIsotopeAmountInApproachCalculationException;
 import com.amapolis.RadioactiveDecay.model.isotope.Isotope;
-import javafx.application.Platform;
+import com.amapolis.RadioactiveDecay.model.utils.TimeCalc;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -35,9 +35,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainWindowController implements Initializable {
     //todo clicking on eXit should also close the background thread
+    //todo error when nothing selected
     private static final Logger log = LoggerFactory.getLogger(MainWindowController.class);
-    private Collection<XYChart.Series<Number, Number>> lineChartSeries;
     private ObservableList<IsotopeTableElement> isotopesInTable;
+    private Map<Isotope, XYChart.Data> isotopeBarXYCharts;
+    private Thread backgroundThread;
 
     @FXML
     private TableView<IsotopeTableElement> isotopeTable;
@@ -106,6 +108,66 @@ public class MainWindowController implements Initializable {
     @FXML
     private void handleButtonCalculateExact(ActionEvent ae) {
         log.info("CalculateExact button clicked!");
+        resetBackgroundThread();
+        try {
+            DecayCalculator decayCalculator = new DecayCalculator();
+
+            //get declared precision level //todo can maybe be shorted
+            final AtomicInteger precision = new AtomicInteger(Integer.parseInt(precisionLevel.getText()));
+            //get declared timeout between timestep
+            final AtomicInteger timeStepInMs = new AtomicInteger(Integer.parseInt(timeoutInMs.getText()));
+            final AtomicInteger timeStepInNs = new AtomicInteger(Integer.parseInt(timeoutInNs.getText()));
+
+            //converts the table isotope element to a map
+            Map<Isotope, Double> initialIsotope = tableElementsToMap(isotopesInTable);
+            //get a set with all occurring isotopes (not a isotope two times)
+            Set<Isotope> allOccurringIsotopes = decayCalculator.getAllOccurringIsotopes(initialIsotope.keySet());
+
+            //one XYChart.Series for each isotope
+            Map<Isotope, XYChart.Series> isotopeSeries = new LinkedHashMap<>();
+
+            //adds for each isotope the same instance to the line chart and the map
+            addIsotopeSeriesToGraph(allOccurringIsotopes, isotopeSeries);
+
+            //todo copy for approach
+            setUpBarChart(allOccurringIsotopes);
+
+            Task backgroundTask = new Task<Object>() {
+                @Override
+                protected Object call() {
+                    try {
+                        decayCalculator.setIsotopeProgressListener(new IsotopeProgressListener() {
+                            @Override
+                            public void onProgress(double time, Map<Isotope, Double> isotopes) {
+                                TimeIsotope isotope = new TimeIsotope(time, isotopes);
+                                updateValue(isotope);
+                                try {
+                                    //todo timeout in ns not sure if this works
+                                    //todo mesure time and set difference as timestep
+                                    Thread.sleep(timeStepInMs.get(), timeStepInNs.get());
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+
+                        decayCalculator.getIsotopeTimeLineExact(precision.doubleValue(), initialIsotope);
+                    } catch (InvalidIsotopeException e) {
+                        e.printStackTrace();
+                        //todo error handling
+                    } finally {
+                        return null;
+                    }
+                }
+            };
+            backgroundThread = new Thread(backgroundTask);
+            backgroundThread.start();
+            setUpdateListenerTimeLineChart(isotopeSeries, backgroundTask);
+        } catch (InvalidIsotopeException e) {
+            e.printStackTrace();
+            //todo error handling
+        }
+        /*
         try {
             DecayCalculator decayCalculator = new DecayCalculator();
 
@@ -133,12 +195,13 @@ public class MainWindowController implements Initializable {
         } catch (InvalidIsotopeException e) {
             //todo exception handling
             e.printStackTrace();
-        }
+        }*/
     }
 
     @FXML
     private void handleButtonCalculateApproach(ActionEvent ae) {
         log.info("CalculateApproach button clicked!");
+        resetBackgroundThread();
         try {
             DecayCalculator decayCalculator = new DecayCalculator();
 
@@ -151,7 +214,6 @@ public class MainWindowController implements Initializable {
             //converts the table isotope element to a map
             Map<Isotope, Double> initialIsotope = tableElementsToMap(isotopesInTable);
             //get a set with all occurring isotopes (not a isotope two times)
-            //todo maybe make this method static
             Set<Isotope> allOccurringIsotopes = decayCalculator.getAllOccurringIsotopes(initialIsotope.keySet());
 
             //one XYChart.Series for each isotope
@@ -190,18 +252,9 @@ public class MainWindowController implements Initializable {
                     }
                 }
             };
-            new Thread(backgroundTask).start();
-            backgroundTask.valueProperty().addListener(new ChangeListener() {
-                @Override
-                public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                    if (newValue != null) {
-                        TimeIsotope timeIsotope = (TimeIsotope) newValue;
-                        for (Isotope iso : timeIsotope.getIsotopes().keySet()) {
-                            isotopeSeries.get(iso).getData().add(new XYChart.Data<Number, Number>(timeIsotope.getTime(), timeIsotope.getIsotopes().get(iso)));
-                        }
-                    }
-                }
-            });
+            backgroundThread = new Thread(backgroundTask);
+            backgroundThread.start();
+            setUpdateListenerTimeLineChart(isotopeSeries, backgroundTask);
         } catch (InvalidIsotopeException e) {
             e.printStackTrace();
             //todo error handling
@@ -219,6 +272,7 @@ public class MainWindowController implements Initializable {
             XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
             series.setName(isotope.getId());
             lineChart.getData().add(series);
+            lineChart.setAnimated(false);
             isotopeSeries.put(isotope, series);
         }
     }
@@ -226,9 +280,11 @@ public class MainWindowController implements Initializable {
     @FXML
     private void handleButtonClearGraph(ActionEvent ae) {
         log.info("ClearGraph button clicked!");
+        resetBackgroundThread();
         //todo maybe better method
         //todo cancle running threads
-        lineChart.getData().setAll();
+        lineChart.getData().clear();
+        barChart.getData().clear();
     }
 
     @Override
@@ -237,7 +293,6 @@ public class MainWindowController implements Initializable {
 
         lineChart.setCreateSymbols(false);
 
-        lineChartSeries = new ArrayList<>();
         isotopesInTable = FXCollections.observableArrayList();
         isotopeTable.setItems(isotopesInTable);
 
@@ -282,5 +337,46 @@ public class MainWindowController implements Initializable {
             }
         }
         return returnMap;
+    }
+
+    private void setUpdateListenerTimeLineChart(Map<Isotope, XYChart.Series> isotopeSeries, Task backgroundTask) {
+        backgroundTask.valueProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                if (newValue != null) {
+                    TimeIsotope timeIsotope = (TimeIsotope) newValue;
+                    barChart.setTitle("Isotopes at: " + TimeCalc.getTimeAsString(timeIsotope.getTime()));
+                    for (Isotope iso : timeIsotope.getIsotopes().keySet()) {
+                        isotopeSeries.get(iso).getData().add(new XYChart.Data<Number, Number>(timeIsotope.getTime(), timeIsotope.getIsotopes().get(iso)));
+                        isotopeBarXYCharts.get(iso).setYValue(timeIsotope.getIsotopes().get(iso));
+                    }
+                }
+            }
+        });
+    }
+
+    private void setUpBarChart(Set<Isotope> allOccurringIsotopes){
+        barChart.getData().clear();
+        isotopeBarXYCharts = new LinkedHashMap<>();
+        XYChart.Series barChartSeries = new XYChart.Series();
+        barChartSeries.setName("Isotopes");
+        for(Isotope iso: allOccurringIsotopes){
+            XYChart.Data tmpChartData = new XYChart.Data<>(iso.getId(), 0);
+            isotopeBarXYCharts.put(iso, tmpChartData);
+            barChartSeries.getData().add(tmpChartData);
+        }
+        barChart.getData().add(barChartSeries);
+        barChart.setAnimated(false);
+        //todo set yaxis max border
+    }
+
+    private void resetBackgroundThread(){
+        if(backgroundThread != null){
+            backgroundThread.stop();
+        }
+    }
+
+    private void resetBarChart(){
+        barChart.setTitle("Amount isotopes at given time");
     }
 }
