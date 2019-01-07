@@ -18,6 +18,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class ChooseIsotopeController implements Initializable {
@@ -124,6 +125,7 @@ public class ChooseIsotopeController implements Initializable {
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
+        ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("/images/logo.png"));
         alert.setTitle("Error!");
         alert.setHeaderText(title);
         alert.setContentText(message);
