@@ -41,7 +41,7 @@ public class ChooseIsotopeController implements Initializable {
         try {
             amount = Double.parseDouble(amountField.getText());
         } catch (Exception e) {}      
-        if (amountField.getText().equals("")) {
+        if (!amountField.getText().equals("")) {
             if (amount > 0) {
                 Isotope selectedIsotope = optionTable.getSelectionModel().getSelectedItem();
                 if (selectedIsotope != null) {
@@ -55,7 +55,7 @@ public class ChooseIsotopeController implements Initializable {
                 showAlert("invalid amount", "The amount of isotopes should be greater than 0.");
             }
         } else {
-            showAlert("invalid amount", "The amount of isotopes should be greater than 0.");
+            showAlert("invalid amount", "No amount given.");
         }
     }
 
