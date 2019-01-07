@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,10 +39,13 @@ public class MainApp extends Application {
         log.debug("Showing JFX scene");
         Scene scene = new Scene(rootNode);
         //scene.getStylesheets().add("/styles/styles.css");
-        //todo set Icon
 
         stage.setTitle("Radioactive decay calculator");
         stage.setScene(scene);
+        //Set application icon
+        stage.getIcons().add(new Image("/images/logo.png"));
+        //close entire Application when clicking on exit (red cross in windows)
+        stage.setOnCloseRequest(event -> System.exit(0));
         stage.show();
     }
 }

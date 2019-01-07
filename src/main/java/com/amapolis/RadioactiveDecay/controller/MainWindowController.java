@@ -22,6 +22,7 @@ import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.slf4j.Logger;
@@ -35,7 +36,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class MainWindowController implements Initializable {
-    //todo clicking on eXit should also close the background thread
     //todo error when nothing selected
     //todo only one active calcuttion
     private static final Logger log = LoggerFactory.getLogger(MainWindowController.class);
@@ -83,7 +83,7 @@ public class MainWindowController implements Initializable {
 
         Stage stage = new Stage();
         String fxmlFile = "/fxml/ChooseIsotope.fxml";
-        log.debug("Loading FXML for main view from: {}", fxmlFile);
+        log.debug("Loading FXML for isotope selection view from: {}", fxmlFile);
         FXMLLoader loader = new FXMLLoader();
         Parent rootNode = loader.load(getClass().getResourceAsStream(fxmlFile));
         ChooseIsotopeController chooseIsotopeController = loader.getController();
@@ -91,10 +91,10 @@ public class MainWindowController implements Initializable {
 
         log.debug("Showing JFX scene");
         Scene scene = new Scene(rootNode);
-        //scene.getStylesheets().add("/styles/styles.css");
-        //todo set Icon
 
         stage.setTitle("Radioactive decay calculator");
+        //Set application icon
+        stage.getIcons().add(new Image("/images/logo.png"));
         stage.setScene(scene);
         stage.show();
     }
