@@ -35,37 +35,13 @@ public class ChooseIsotopeController implements Initializable {
     @FXML
     private TextField inputField, amountField;
 
-    /*
-    public ChooseIsotopeController() {
-        isotopeSet = new JsonReader().getIsotopeSet();
-
-        double start = System.currentTimeMillis();
-        ArrayList<Isotope> testList = getOptionList("u");
-        System.out.println("t1: "+(System.currentTimeMillis()-start));
-        start = System.currentTimeMillis();
-        ArrayList<Isotope> testList1 = getOptionList("ir");
-        System.out.println("t2: "+(System.currentTimeMillis()-start));
-        start = System.currentTimeMillis();
-        ArrayList<Isotope> testList2 = getOptionList("tr");
-        System.out.println("t3: "+(System.currentTimeMillis()-start));
-        start = System.currentTimeMillis();
-        ArrayList<Isotope> testList3 = getOptionList("FE");
-        System.out.println("t4: "+(System.currentTimeMillis()-start));
-        start = System.currentTimeMillis();
-        ArrayList<Isotope> testList4 = getOptionList("34");
-        System.out.println("t3: "+(System.currentTimeMillis()-start));
-
-        System.out.println("done");
-    }
-     */
     @FXML
     private void selectIsotope(ActionEvent ae) {
         double amount = 0;
         try {
             amount = Double.parseDouble(amountField.getText());
-        } catch (Exception e) {
-        }
-        if (amountField.getText() != "") {
+        } catch (Exception e) {}      
+        if (amountField.getText().equals("")) {
             if (amount > 0) {
                 Isotope selectedIsotope = optionTable.getSelectionModel().getSelectedItem();
                 if (selectedIsotope != null) {
