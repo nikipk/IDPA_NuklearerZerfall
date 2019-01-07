@@ -57,61 +57,56 @@ public class ChooseIsotopeController implements Initializable {
         System.out.println("done");
     }
     */
-
+    
     @FXML
-    private void setOptionTable(){
-        shownOptions.clear();
-        try {
-            ArrayList<Isotope> options = getOptionList(inputField.getText());
-            for(Isotope option: options){
-                shownOptions.add(option);
-            }
-        } catch (Exception e){
-        }
-    }
-
-    @FXML
-    private void selectIsotope(ActionEvent ae){
+    private void selectIsotope(ActionEvent ae) {
         Isotope selectedIsotope = optionTable.getSelectionModel().getSelectedItem();
         double amount = Double.parseDouble(amountField.getText());
         mainWindowController.addIsotopeToTable(selectedIsotope, amount);
-        System.out.println(amount+" atoms of the isotope "+selectedIsotope.getId()+ " selected");
+        System.out.println(amount + " atoms of the isotope " + selectedIsotope.getId() + " selected");
         ((Stage) optionTable.getScene().getWindow()).close();
     }
 
+    @FXML
+    private void setOptionTable() {
+        shownOptions.clear();
+        try {
+            ArrayList<Isotope> options = getOptionList(inputField.getText());
+            for (Isotope option : options) {
+                shownOptions.add(option);
+            }
+        } catch (Exception e) {
+        }
+    }
+
     private ArrayList<Isotope> getOptionList(String inputString) {
-        if (isValidInput(isotopeSet, inputString.toLowerCase())) {
-            ArrayList<Isotope> optionList = new ArrayList<>();
+        ArrayList<Isotope> optionList = new ArrayList<>();
+        if (inputString.toLowerCase().contains("-")) {
+            String[] inputs = inputString.toLowerCase().split("-");
+            String isotopeName = inputs[0].toLowerCase();           
+            if (inputs.length > 1) {
+                String isotopeNumber = "";
+                isotopeNumber = inputs[1].toLowerCase();
+                for (Isotope isotope : isotopeSet) {
+                    if ((isotope.getId().toLowerCase().contains(isotopeName) || isotope.getElementName().toLowerCase().contains(isotopeName)) && ((isotope.getNumberNeutrons() + isotope.getNumberProtons() + "").toLowerCase().contains(isotopeNumber))) {
+                        optionList.add(isotope);
+                    }
+                }
+            }else{
+               for (Isotope isotope : isotopeSet) {
+                    if (isotope.getId().toLowerCase().contains(isotopeName) || isotope.getElementName().toLowerCase().contains(isotopeName)) {
+                        optionList.add(isotope);
+                    }
+                } 
+            }               
+        } else {
             for (Isotope isotope : isotopeSet) {
-                if (isotope.getId().toLowerCase().contains(inputString.toLowerCase())) {
-                    optionList.add(isotope);
-                } else if (isotope.getElementName().toLowerCase().contains(inputString.toLowerCase())) {
+                if (isotope.getId().toLowerCase().contains(inputString.toLowerCase()) || isotope.getElementName().toLowerCase().contains(inputString.toLowerCase())) {
                     optionList.add(isotope);
                 }
             }
-            return sortOptionList(optionList);
         }
-        return null;
-    }
-
-
-    private boolean isValidInput(Set<Isotope> isotopeSet, String inputString) {
-        for (Isotope isotope : isotopeSet) {
-            if (isotope.getId().toLowerCase().contains(inputString) || isotope.getElementName().toLowerCase().contains(inputString)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private Isotope getTopOption(ArrayList<Isotope> options) {
-        Isotope topOption = options.get(0);
-        for (Isotope option : options) {
-            if (option.getAtomicMass() < topOption.getAtomicMass()) {
-                topOption = option;
-            }
-        }
-        return topOption;
+        return sortOptionList(optionList);
     }
 
     private ArrayList<Isotope> sortOptionList(ArrayList<Isotope> unsortedIsotopeList) {
@@ -123,6 +118,16 @@ public class ChooseIsotopeController implements Initializable {
             unsortedIsotopeList.remove(topOption);
         }
         return sortedIsotopeList;
+    }
+
+    private Isotope getTopOption(ArrayList<Isotope> options) {
+        Isotope topOption = options.get(0);
+        for (Isotope option : options) {
+            if (option.getAtomicMass() < topOption.getAtomicMass()) {
+                topOption = option;
+            }
+        }
+        return topOption;
     }
 
     public void setMainWindowController(MainWindowController mainWindowController) {
