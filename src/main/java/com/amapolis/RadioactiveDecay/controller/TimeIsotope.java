@@ -4,6 +4,9 @@ import com.amapolis.RadioactiveDecay.model.isotope.Isotope;
 
 import java.util.Map;
 
+/**
+ * POJO. Contains time and isotope.
+ */
 public class TimeIsotope {
     private double time;
     private Map<Isotope, Double> isotopes;

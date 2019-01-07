@@ -1,7 +1,6 @@
 package com.amapolis.RadioactiveDecay.controller;
 
 import com.amapolis.RadioactiveDecay.model.DecayCalculator;
-import com.amapolis.RadioactiveDecay.model.IsotopeProgressListener;
 import com.amapolis.RadioactiveDecay.model.exception.InvalidIsotopeException;
 import com.amapolis.RadioactiveDecay.model.exception.NegativeIsotopeAmountInApproachCalculationException;
 import com.amapolis.RadioactiveDecay.model.isotope.Isotope;
@@ -36,8 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class MainWindowController implements Initializable {
-    //todo error when nothing selected
-    //todo only one active calcuttion
     private static final Logger log = LoggerFactory.getLogger(MainWindowController.class);
     private ObservableList<IsotopeTableElement> isotopesInTable;
     private Map<Isotope, XYChart.Data> isotopeBarXYCharts;
@@ -66,9 +63,6 @@ public class MainWindowController implements Initializable {
     private LineChart<Number, Number> lineChart;
 
     @FXML
-    private NumberAxis xAxis, yAxis;
-
-    @FXML
     private BarChart barChart;
 
     @FXML
@@ -77,10 +71,16 @@ public class MainWindowController implements Initializable {
     @FXML
     private CheckBox animated;
 
+    /**
+     * Handles the "Add Isotope" - Button action. Opens a new window where the user can select an isotope.
+     * @param ae
+     * @throws IOException
+     */
     @FXML
     private void handleButtonAdd(ActionEvent ae) throws IOException {
         log.info("Add button clicked!");
 
+        //open new window to select the isotope
         Stage stage = new Stage();
         String fxmlFile = "/fxml/ChooseIsotope.fxml";
         log.debug("Loading FXML for isotope selection view from: {}", fxmlFile);
@@ -99,6 +99,10 @@ public class MainWindowController implements Initializable {
         stage.show();
     }
 
+    /**
+     * Handles the "Delete Isotope" - Button action. Removes the selected isotope from the table.
+     * @param ae
+     */
     @FXML
     private void handleButtonDelete(ActionEvent ae) {
         log.info("Delete button clicked!");
@@ -111,50 +115,68 @@ public class MainWindowController implements Initializable {
         }
     }
 
+    /**
+     * Handles the "Calculate decay exact" - Button. Starts the exact decay calculation for the isotopes in the list.
+     * @param ae
+     */
     @FXML
+    //Suppress Intellij intern waring due to having similar code for the exact method
+    @SuppressWarnings("Duplicates")
     private void handleButtonCalculateExact(ActionEvent ae) {
         log.info("CalculateExact button clicked!");
         resetBackgroundThread();
         try {
             DecayCalculator decayCalculator = new DecayCalculator();
 
-            //todo copy errorhandling for approach
+            //get declared zeroToleranceValue
             double zeroToleranceValue;
             try {
                 zeroToleranceValue = Double.parseDouble(zeroTolerance.getText());
-            } catch (NumberFormatException nfx){
+            } catch (NumberFormatException nfx) {
                 showAlert("Zero tolerance value error", "The value in the zero tolerance field couldn't be parsed into a number.");
                 return;
             }
             decayCalculator.setZeroTolerance(zeroToleranceValue);
 
             //atomic Objects because they are used in other threads => threadsafe
-            //get declared precision level //todo can maybe be shorted
+            //get declared precision level
             final AtomicInteger precision;
             try {
                 precision = new AtomicInteger(Integer.parseInt(precisionLevel.getText()));
-            }catch (NumberFormatException nfe){
+                if(precision.get() <= 0){
+                    showAlert("Precision level error", "The value in the precision field must be greater than 0.");
+                    return;
+                }
+            } catch (NumberFormatException nfe) {
                 showAlert("Precision level error", "The value in the precision field couldn't be parsed into a number.");
                 return;
             }
-            //get declared timeout between timestep
+
+            //get declared timeout between time step
             final AtomicInteger timeStepInMs;
             final AtomicInteger timeStepInNs;
             try {
                 timeStepInMs = new AtomicInteger(Integer.parseInt(timeoutInMs.getText()));
                 timeStepInNs = new AtomicInteger(Integer.parseInt(timeoutInNs.getText()));
-            } catch (NumberFormatException nfe){
+            } catch (NumberFormatException nfe) {
                 showAlert("Time step error", "The value in the time step field couldn't be parsed into a number.");
                 return;
             }
 
-            if(timeStepInMs.doubleValue() + timeStepInNs.doubleValue()/1000 < 0.1){
-                showAlert("Time step error", "The value for the time step must at least be 100ns or displaying issues might occur.");
+            if (timeStepInMs.doubleValue() + timeStepInNs.doubleValue() / 1000 < 0.1) {
+                showAlert("Time step error", "The value for the time step must greater than 100ns or displaying issues might occur.");
                 return;
             }
 
             //converts the table isotope element to a map
             Map<Isotope, Double> initialIsotope = tableElementsToMap(isotopesInTable);
+
+            //map must at least contain one isotope
+            if (initialIsotope.isEmpty()) {
+                showAlert("No isotope added", "You must select at least 1 Isotope.");
+                return;
+            }
+
             //get a set with all occurring isotopes (not a isotope two times)
             Set<Isotope> allOccurringIsotopes = decayCalculator.getAllOccurringIsotopes(initialIsotope.keySet());
 
@@ -162,37 +184,46 @@ public class MainWindowController implements Initializable {
             Map<Isotope, XYChart.Series> isotopeSeries = new LinkedHashMap<>();
 
             //adds for each isotope the same instance to the line chart and the map
-            addIsotopeSeriesToGraph(allOccurringIsotopes, isotopeSeries);
+            addIsotopeSeriesToLineGraph(allOccurringIsotopes, isotopeSeries);
 
             setUpBarChart(allOccurringIsotopes);
 
+            //Create new background Task => separation from ui thread
             Task backgroundTask = new Task<Object>() {
                 @Override
+                //Suppress Intellij intern waring due to having similar code for the approach method
                 @SuppressWarnings("Duplicates")
                 protected Object call() {
                     try {
+                        //This interface gets executed between each time step. => better separation from model/view/controller
+                        //keep everything where it belongs.
                         decayCalculator.setIsotopeProgressListener((time, isotopes) -> {
+                            //The updateValue function only takes one parameter, so this POJO object was necessary.
                             TimeIsotope isotope = new TimeIsotope(time, isotopes);
+                            //update the value for each time step
                             updateValue(isotope);
                             try {
-                                //todo optional measure time and set difference as timestep
+                                //let thread sleep for desired time/desired time step
+                                //WARNING this is a bad approach! More about why in the documentation
                                 Thread.sleep(timeStepInMs.get(), timeStepInNs.get());
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                         });
-
+                        //Start calculation from decay
                         decayCalculator.getIsotopeTimeLineExact(precision.doubleValue(), initialIsotope);
                     } catch (InvalidIsotopeException e) {
                         e.printStackTrace();
-                        //todo error handling
+                        showAlert("Invalid isotope exception", "An invalid isotope was detected. Try again or choose an other isotope.");
                     } finally {
                         return null;
                     }
                 }
             };
+            //Create and start new background thread
             backgroundThread = new Thread(backgroundTask);
             backgroundThread.start();
+            //add a listener the the value of the background thread
             setUpdateListenerTimeLineChart(isotopeSeries, backgroundTask);
         } catch (InvalidIsotopeException e) {
             e.printStackTrace();
@@ -200,22 +231,67 @@ public class MainWindowController implements Initializable {
         }
     }
 
+    /**
+     * Handles the "Calculate decay approach" - Button. Starts the approach decay calculation for the isotopes in the list.
+     * @param ae
+     */
     @FXML
+    //Suppress Intellij intern waring due to having similar code for the exact method
+    @SuppressWarnings("Duplicates")
     private void handleButtonCalculateApproach(ActionEvent ae) {
         log.info("CalculateApproach button clicked!");
         resetBackgroundThread();
         try {
             DecayCalculator decayCalculator = new DecayCalculator();
-            decayCalculator.setZeroTolerance(Double.parseDouble(zeroTolerance.getText()));
+            //get declared zeroToleranceValue
+            double zeroToleranceValue;
+            try {
+                zeroToleranceValue = Double.parseDouble(zeroTolerance.getText());
+            } catch (NumberFormatException nfx) {
+                showAlert("Zero tolerance value error", "The value in the zero tolerance field couldn't be parsed into a number.");
+                return;
+            }
+            decayCalculator.setZeroTolerance(zeroToleranceValue);
 
-            //get declared precision level //todo can maybe be shorted
-            final AtomicInteger precision = new AtomicInteger(Integer.parseInt(precisionLevel.getText()));
-            //get declared timeout between timestep
-            final AtomicInteger timeStepInMs = new AtomicInteger(Integer.parseInt(timeoutInMs.getText()));
-            final AtomicInteger timeStepInNs = new AtomicInteger(Integer.parseInt(timeoutInNs.getText()));
+            //atomic Objects because they are used in other threads => threadsafe
+            //get declared precision level
+            final AtomicInteger precision;
+            try {
+                precision = new AtomicInteger(Integer.parseInt(precisionLevel.getText()));
+                if(precision.get() <= 0){
+                    showAlert("Precision level error", "The value in the precision field must be greater than 0.");
+                    return;
+                }
+            } catch (NumberFormatException nfe) {
+                showAlert("Precision level error", "The value in the precision field couldn't be parsed into a number.");
+                return;
+            }
+            //get declared timeout between time step
+            final AtomicInteger timeStepInMs;
+            final AtomicInteger timeStepInNs;
+
+            try {
+                timeStepInMs = new AtomicInteger(Integer.parseInt(timeoutInMs.getText()));
+                timeStepInNs = new AtomicInteger(Integer.parseInt(timeoutInNs.getText()));
+            } catch (NumberFormatException nfe) {
+                showAlert("Time step error", "The value in the time step field couldn't be parsed into a number.");
+                return;
+            }
+
+            if (timeStepInMs.doubleValue() + timeStepInNs.doubleValue() / 1000 < 0.1) {
+                showAlert("Time step error", "The value for the time step must greater than 100ns or displaying issues might occur.");
+                return;
+            }
 
             //converts the table isotope element to a map
             Map<Isotope, Double> initialIsotope = tableElementsToMap(isotopesInTable);
+
+            //map must at least contain one isotope
+            if (initialIsotope.isEmpty()) {
+                showAlert("No isotope added", "You must select at least 1 Isotope.");
+                return;
+            }
+
             //get a set with all occurring isotopes (not a isotope two times)
             Set<Isotope> allOccurringIsotopes = decayCalculator.getAllOccurringIsotopes(initialIsotope.keySet());
 
@@ -223,40 +299,49 @@ public class MainWindowController implements Initializable {
             Map<Isotope, XYChart.Series> isotopeSeries = new LinkedHashMap<>();
 
             //adds for each isotope the same instance to the line chart and the map
-            addIsotopeSeriesToGraph(allOccurringIsotopes, isotopeSeries);
+            addIsotopeSeriesToLineGraph(allOccurringIsotopes, isotopeSeries);
 
             setUpBarChart(allOccurringIsotopes);
 
+            //Create new background Task => separation from ui thread
             Task backgroundTask = new Task<Object>() {
                 @Override
-                //todo comment why supresswaring (also other calculation)
+                //Suppress Intellij intern waring due to having similar code for the exact method
                 @SuppressWarnings("Duplicates")
                 protected Object call() {
                     try {
+                        //This interface gets executed between each time step. => better separation from model/view/controller
+                        //keep everything where it belongs.
                         decayCalculator.setIsotopeProgressListener((time, isotopes) -> {
+                            //The updateValue function only takes one parameter, so this POJO object was necessary.
                             TimeIsotope isotope = new TimeIsotope(time, isotopes);
+                            //update the value for each time step
                             updateValue(isotope);
                             try {
+                                //let thread sleep for desired time/desired time step
+                                //WARNING this is a bad approach! More about why in the documentation
                                 Thread.sleep(timeStepInMs.get(), timeStepInNs.get());
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                         });
-
+                        //Start calculation from decay
                         decayCalculator.getIsotopeTimeLineApproach(precision.doubleValue(), initialIsotope);
                     } catch (InvalidIsotopeException e) {
                         e.printStackTrace();
-                        //todo error handling
+                        showAlert("Invalid isotope exception", "An invalid isotope was detected. Try again or choose an other isotope.");
                     } catch (NegativeIsotopeAmountInApproachCalculationException e) {
                         e.printStackTrace();
-                        //todo error handling
+                        showAlert("Negative isotope exception", "A negative amount of isotopes was detected. Try again, use the exact method or choose an other isotope.");
                     } finally {
                         return null;
                     }
                 }
             };
+            //Create and start new background thread
             backgroundThread = new Thread(backgroundTask);
             backgroundThread.start();
+            //add a listener the the value of the background thread
             setUpdateListenerTimeLineChart(isotopeSeries, backgroundTask);
         } catch (InvalidIsotopeException e) {
             e.printStackTrace();
@@ -270,7 +355,7 @@ public class MainWindowController implements Initializable {
      * @param allOccurringIsotopes
      * @param isotopeSeries
      */
-    private void addIsotopeSeriesToGraph(Set<Isotope> allOccurringIsotopes, Map<Isotope, XYChart.Series> isotopeSeries) {
+    private void addIsotopeSeriesToLineGraph(Set<Isotope> allOccurringIsotopes, Map<Isotope, XYChart.Series> isotopeSeries) {
         for (Isotope isotope : allOccurringIsotopes) {
             XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
             series.setName(isotope.getId());
@@ -280,15 +365,22 @@ public class MainWindowController implements Initializable {
         }
     }
 
+    /**
+     * Handles the "Clear graphs" - Button. This button clears all graphs and resets the calculation background thread.
+     * @param ae
+     */
     @FXML
     private void handleButtonClearGraph(ActionEvent ae) {
         log.info("ClearGraph button clicked!");
         resetBackgroundThread();
-        //todo maybe better method
         lineChart.getData().clear();
         resetBarChart();
     }
 
+    /**
+     * Handles the "Pause/Continue" - Button. Pauses or continues the background calculation thread.
+     * @param ae
+     */
     @FXML
     private void handleButtonPause(ActionEvent ae) {
         log.info("Pause button clicked!");
@@ -303,6 +395,11 @@ public class MainWindowController implements Initializable {
         }
     }
 
+    /**
+     * set initial settings
+     * @param location
+     * @param resources
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         log.info("Started MainWindowController");
@@ -320,27 +417,42 @@ public class MainWindowController implements Initializable {
         massCol.setCellValueFactory(new PropertyValueFactory<IsotopeTableElement, Integer>("atomicMass"));
         halfLifeCol.setCellValueFactory(new PropertyValueFactory<IsotopeTableElement, Double>("halfTimeInS"));
         amountCol.setCellValueFactory(new PropertyValueFactory<IsotopeTableElement, Double>("amount"));
-        //todo make amount editable in table, => doesn't work (disabled edit in fxml too)
-        //amountCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
         decayTypeCol.setCellValueFactory(new PropertyValueFactory<IsotopeTableElement, String>("decayType"));
 
+        //make tooltips appear faster
         hackTooltipStartTiming();
     }
 
-    private void showAlert(String title, String message) {
+    /**
+     * General method to show an alert
+     * @param title
+     * @param message
+     */
+    public static void showAlert(String title, String message) {
         log.error("An error message was shown, \"" + title + "\", \"" + message + "\"");
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("/images/logo.png"));
+        ((Stage) alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("/images/logo.png"));
         alert.setTitle("Error!");
         alert.setHeaderText(title);
         alert.setContentText(message);
         alert.show();
     }
 
+    /**
+     * add an isotope from outside. Here needed for the "ChooseIsotopeWindow".
+     * @param isotope
+     * @param amount
+     */
     public void addIsotopeToTable(Isotope isotope, double amount) {
         isotopesInTable.add(new IsotopeTableElement(isotope, amount));
     }
 
+    /**
+     * This method converts isotope table elements from the tableView to a Map.
+     * The map only contains each isotope once and adds up the amount-values.
+     * @param isotopeTableElements
+     * @return
+     */
     private Map<Isotope, Double> tableElementsToMap(Collection<IsotopeTableElement> isotopeTableElements) {
         Map<Isotope, Double> returnMap = new LinkedHashMap<>();
         for (IsotopeTableElement isotopeTableElement : isotopeTableElements) {
@@ -353,22 +465,28 @@ public class MainWindowController implements Initializable {
         return returnMap;
     }
 
+    /**
+     * Set a change listener to the value in between a time step.
+     * @param isotopeSeries
+     * @param backgroundTask
+     */
     private void setUpdateListenerTimeLineChart(Map<Isotope, XYChart.Series> isotopeSeries, Task backgroundTask) {
-        backgroundTask.valueProperty().addListener(new ChangeListener() {
-            @Override
-            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                if (newValue != null) {
-                    TimeIsotope timeIsotope = (TimeIsotope) newValue;
-                    barChart.setTitle("Isotopes at: " + TimeCalc.getTimeAsString(timeIsotope.getTime()));
-                    for (Isotope iso : timeIsotope.getIsotopes().keySet()) {
-                        isotopeSeries.get(iso).getData().add(new XYChart.Data<Number, Number>(timeIsotope.getTime(), timeIsotope.getIsotopes().get(iso)));
-                        isotopeBarXYCharts.get(iso).setYValue(timeIsotope.getIsotopes().get(iso));
-                    }
+        backgroundTask.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                TimeIsotope timeIsotope = (TimeIsotope) newValue;
+                barChart.setTitle("Isotopes at: " + TimeCalc.getTimeAsString(timeIsotope.getTime()));
+                for (Isotope iso : timeIsotope.getIsotopes().keySet()) {
+                    isotopeSeries.get(iso).getData().add(new XYChart.Data<Number, Number>(timeIsotope.getTime(), timeIsotope.getIsotopes().get(iso)));
+                    isotopeBarXYCharts.get(iso).setYValue(timeIsotope.getIsotopes().get(iso));
                 }
             }
         });
     }
 
+    /**
+     * This method sets up the bar chart for the next decay calculation.
+     * @param allOccurringIsotopes
+     */
     private void setUpBarChart(Set<Isotope> allOccurringIsotopes) {
         barChart.getData().clear();
         isotopeBarXYCharts = new LinkedHashMap<>();
@@ -381,9 +499,11 @@ public class MainWindowController implements Initializable {
         }
         barChart.getData().add(barChartSeries);
         barChart.setAnimated(false);
-        //todo set yaxis max border
     }
 
+    /**
+     * resets the background thread.
+     */
     private void resetBackgroundThread() {
         threadPaused = false;
         if (backgroundThread != null) {
@@ -391,13 +511,16 @@ public class MainWindowController implements Initializable {
         }
     }
 
+    /**
+     * Reset the bar chart => is empty after this method
+     */
     private void resetBarChart() {
         barChart.setTitle("Amount isotopes at given time");
         barChart.getData().clear();
     }
 
     /**
-     * This function is from StackOverFlow and makes tooltips load the desired speed. Does only have to be used once for entire application.
+     * This function is from StackOverFlow and makes tooltips show to the desired time. Does only have to be used once for entire application.
      * https://stackoverflow.com/questions/26854301/how-to-control-the-javafx-tooltips-delay
      */
     public static void hackTooltipStartTiming() {

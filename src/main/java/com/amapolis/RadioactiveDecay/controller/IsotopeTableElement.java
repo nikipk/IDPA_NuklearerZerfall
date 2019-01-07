@@ -3,6 +3,9 @@ package com.amapolis.RadioactiveDecay.controller;
 import com.amapolis.RadioactiveDecay.model.isotope.Isotope;
 import com.amapolis.RadioactiveDecay.model.isotope.UnstableIsotope;
 
+/**
+ * This class creates an object for the tableView because the tableView doesn't work with Maps.
+ */
 public class IsotopeTableElement {
     private Isotope isotope;
     private double amount;

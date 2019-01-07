@@ -1,5 +1,6 @@
 package com.amapolis.RadioactiveDecay.controller;
 
+import com.amapolis.RadioactiveDecay.model.DecayCalculator;
 import com.amapolis.RadioactiveDecay.model.IsotopeSetManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,8 +21,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ChooseIsotopeController implements Initializable {
+    private static final Logger log = LoggerFactory.getLogger(ChooseIsotopeController.class);
 
     private Set<Isotope> isotopeSet;
     private ObservableList<Isotope> shownOptions;
@@ -38,25 +42,24 @@ public class ChooseIsotopeController implements Initializable {
 
     @FXML
     private void selectIsotope(ActionEvent ae) {
-        double amount = 0;
-        try {
-            amount = Double.parseDouble(amountField.getText());
-        } catch (Exception e) {}      
-        if (!amountField.getText().equals("")) {
+        Isotope selectedIsotope = optionTable.getSelectionModel().getSelectedItem();
+        if (selectedIsotope != null) {
+            double amount;
+            try {
+                amount = Double.parseDouble(amountField.getText());
+            } catch (Exception e) {
+                MainWindowController.showAlert("Invalid amount", "The value in the amount field couldn't be parsed into a number.");
+                return;
+            }
             if (amount > 0) {
-                Isotope selectedIsotope = optionTable.getSelectionModel().getSelectedItem();
-                if (selectedIsotope != null) {
-                    mainWindowController.addIsotopeToTable(selectedIsotope, amount);
-                    System.out.println("INFO  ChooseIsotopeController - " + amount + " atoms of the isotope " + selectedIsotope.getId() + " selected");
-                    ((Stage) optionTable.getScene().getWindow()).close();
-                } else {
-                    showAlert("invalid isotope", "An isotope has to be selected.");
-                }
+                mainWindowController.addIsotopeToTable(selectedIsotope, amount);
+                log.info(amount + " atoms of the isotope " + selectedIsotope.getId() + " selected");
+                ((Stage) optionTable.getScene().getWindow()).close();
             } else {
-                showAlert("invalid amount", "The amount of isotopes should be greater than 0.");
+                MainWindowController.showAlert("Invalid amount", "The amount of isotopes must be greater than 0.");
             }
         } else {
-            showAlert("invalid amount", "No amount given.");
+            MainWindowController.showAlert("No isotope selected", "You have to select an isotope from the option list.");
         }
     }
 
@@ -123,14 +126,6 @@ public class ChooseIsotopeController implements Initializable {
         return topOption;
     }
 
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("/images/logo.png"));
-        alert.setTitle("Error!");
-        alert.setHeaderText(title);
-        alert.setContentText(message);
-        alert.show();
-    }
 
     public void setMainWindowController(MainWindowController mainWindowController) {
         this.mainWindowController = mainWindowController;

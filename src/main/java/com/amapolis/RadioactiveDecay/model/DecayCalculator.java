@@ -25,7 +25,7 @@ public class DecayCalculator {
     }
 
     /**
-     * This Method calculates the radioactive decay and the resulting Isotopes of a single Isotope
+     * This Method calculates the radioactive decay and the resulting isotopes of one isotope
      *
      * @param initialIsotope
      * @param amountIsotope
@@ -34,8 +34,8 @@ public class DecayCalculator {
      * @throws InvalidIsotopeException
      */
     public Map<Isotope, Double> getIsotopesAtTimeExact(Isotope initialIsotope, double amountIsotope, double time) throws InvalidIsotopeException {
-        //Maps are in fact slower than Container classes in most cases, but not by far. Maps though have a a lot faster containsKey function which we might need if want multiple initial isotopes.
-        //For performance tests please refer to the performance test in the test project.
+        //Maps are in fact slower than "Container classes" in most cases, but not by far. Maps though have a a lot faster containsKey function which we might need if want multiple initial isotopes.
+        //Please refer to the documentation for more precise information
         /* better looking implementation
         Map<Isotope, Double> returnIsotopes = new LinkedHashMap<Isotope, Double>();
 
@@ -90,13 +90,14 @@ public class DecayCalculator {
             double amountAfterTime = amountIsotope * Math.pow(unstableIsotope.getDecayFactor(), time);
             returnIsotopes.put(unstableIsotope, amountAfterTime);
 
+            //recursive calculation
             returnIsotopes.putAll(getIsotopesAtTimeExact(unstableIsotope.getEmergingIsotope(), amountIsotope - amountAfterTime, time));
             return returnIsotopes;
         }
     }
 
     /**
-     * This Method calculates the radioactive decay and the resulting Isotopes of multiple Isotopes
+     * This Method calculates the radioactive decay and the resulting isotopes of multiple isotopes
      *
      * @param initialIsotopes
      * @param time
@@ -105,7 +106,7 @@ public class DecayCalculator {
      * @throws InvalidIsotopeException
      */
     public Map<Isotope, Double> getIsotopesAtTimeExact(Map<Isotope, Double> initialIsotopes, double time, Set<Isotope> allOccurringIsotopes) throws InvalidIsotopeException {
-        //to not override existing values! if we just use put it would override the value each time
+        //not override existing values! if just "put()" is used it would override the value each time
         Map<Isotope, Double> returnIsotopes = allOccurringIsotopes.stream().collect(Collectors.toMap(Function.identity(), p -> 0.0));
 
         for (Isotope initialIsotope : initialIsotopes.keySet()) {
@@ -122,8 +123,8 @@ public class DecayCalculator {
     }
 
     /**
-     * This Method calculates the approaching radioactive decay and the resulting Isotopes of a single Isotope
-     * Please make sure that precision level is enough high or this function will return a imprecise value
+     * This Method calculates an radioactive decay approach and the resulting isotopes of one isotope.
+     * Please make sure that precision level is enough high or this calculation will return a imprecise value
      *
      * @param initialIsotope
      * @param amountIsotope
@@ -135,6 +136,7 @@ public class DecayCalculator {
      */
     public Map<Isotope, Double> getIsotopesAtTimeApproach(Isotope initialIsotope, double amountIsotope, double timeLastStep, double timeCurrently) throws InvalidIsotopeException, NegativeIsotopeAmountInApproachCalculationException {
 
+        //no values below 0 are allowed
         if(amountIsotope < 0.0) {
             throw new NegativeIsotopeAmountInApproachCalculationException(amountIsotope);
         }
@@ -152,19 +154,20 @@ public class DecayCalculator {
                 throw new InvalidIsotopeException();
             }
             double amountAfterTime = amountIsotope - (amountIsotope * unstableIsotope.getApproachValue() * (timeCurrently - timeLastStep));
-            //make sure no sub zero value fucks up the algorithm
+            //make sure no sub zero value breaks the algorithm
             if(amountAfterTime < 0.0){
                 amountAfterTime = 0.0;
             }
             returnIsotopes.put(initialIsotope, amountAfterTime);
 
+            //recursive calculation
             returnIsotopes.putAll(getIsotopesAtTimeApproach(unstableIsotope.getEmergingIsotope(), amountIsotope - amountAfterTime, timeLastStep, timeCurrently));
             return returnIsotopes;
         }
     }
 
     /**
-     * This Method calculates the approaching radioactive decay and the resulting Isotopes of multiple Isotopes
+     * This Method calculates the approaching radioactive decay and the resulting isotopes of multiple isotopes
      *
      * @param initialIsotopes
      * @param timeLastStep
@@ -175,7 +178,7 @@ public class DecayCalculator {
      * @throws NegativeIsotopeAmountInApproachCalculationException
      */
     public Map<Isotope, Double> getIsotopesAtTimeApproach(Map<Isotope, Double> initialIsotopes, double timeLastStep, double timeCurrently, Set<Isotope> allOccurringIsotopes) throws InvalidIsotopeException, NegativeIsotopeAmountInApproachCalculationException {
-        //to not override existing values! if we just use put it would override the value each time
+        //not override existing values! if just "put()" is used it would override the value each time
         Map<Isotope, Double> returnIsotopes = allOccurringIsotopes.stream().collect(Collectors.toMap(Function.identity(), p -> 0.0));
 
         for (Isotope initialIsotope : initialIsotopes.keySet()) {
@@ -272,7 +275,7 @@ public class DecayCalculator {
     }
 
     /**
-     * This method create a timeline of the isotope decay.
+     * This method creates a timeline of the isotope decay.
      *
      * @param precisionLevel  (fraction of halftime => higher more precise, lower faster)
      * @param initialIsotopes
@@ -344,28 +347,6 @@ public class DecayCalculator {
     }
 
     /**
-     * This method searches for the fastest decaying isotope
-     * returns null if no isotope is decaying
-     *
-     * @param isotopes
-     */
-    private UnstableIsotope findFastestDecayingIsotope(Collection<Isotope> isotopes) {
-        UnstableIsotope fastestDecayingIsotope = null;
-        double shortestTime = Double.MAX_VALUE;
-        for (Isotope i : isotopes) {
-            if (i instanceof UnstableIsotope) {
-                UnstableIsotope tmpUnstableIsotope = (UnstableIsotope) i;
-                double tmpDecayTime = tmpUnstableIsotope.getHalfTimeInS();
-                if (shortestTime > tmpDecayTime) {
-                    shortestTime = tmpDecayTime;
-                    fastestDecayingIsotope = tmpUnstableIsotope;
-                }
-            }
-        }
-        return fastestDecayingIsotope;
-    }
-
-    /**
      * This method searches for the fastest decaying isotope with more than the tolerance value
      * returns null if no isotope is decaying
      *
@@ -412,7 +393,7 @@ public class DecayCalculator {
     }
 
     /**
-     * Returns a small timeline for stable isotopes. This is because the application should display a straight line and not only a dot.
+     * Returns a small timeline for stable isotopes. This is because the application should display a straight line and not only a dot when only stable isotopes were selected.
      * @param timeLine
      * @param initialIsotopes
      * @return
@@ -421,7 +402,7 @@ public class DecayCalculator {
         timeLine.put(0.0, initialIsotopes);
         isotopeProgressListener.onProgress(0.0, initialIsotopes);
         timeLine.put(0.1, initialIsotopes);
-        isotopeProgressListener.onProgress(0.1, initialIsotopes);
+        isotopeProgressListener.onProgress(0.001, initialIsotopes);
         return timeLine;
     }
 }

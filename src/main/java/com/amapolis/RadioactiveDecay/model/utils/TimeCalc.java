@@ -2,7 +2,15 @@ package com.amapolis.RadioactiveDecay.model.utils;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * This class converts time to an other format.
+ */
 public class TimeCalc {
+    /**
+     * Converts seconds to a String with years, days, hours, minutes, seconds, milliseconds and nanoseconds.
+     * @param totalSeconds
+     * @return
+     */
     public static String getTimeAsString(double totalSeconds){
         double years = totalSeconds / 60 / 60 / 24 / 365;
         double days = (years % 1) * 365;

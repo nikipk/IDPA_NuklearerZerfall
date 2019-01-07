@@ -1,10 +1,7 @@
 package com.amapolis.RadioactiveDecay.model.isotope;
 
-import com.amapolis.RadioactiveDecay.model.utils.RandomColor;
-import javafx.scene.paint.Color;
-
 /**
- * This Class represents the base information of one Isotope
+ * This class represents the base information of one isotope.
  */
 public abstract class Isotope {
     

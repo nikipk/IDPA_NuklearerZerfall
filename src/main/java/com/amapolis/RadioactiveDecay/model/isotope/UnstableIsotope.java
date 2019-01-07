@@ -1,7 +1,7 @@
 package com.amapolis.RadioactiveDecay.model.isotope;
 
 /**
- * Class for unstable isotopes. Contains some more information.
+ * Class for unstable isotopes. Contains some more information than stable isotopes.
  */
 public class UnstableIsotope extends Isotope {
     

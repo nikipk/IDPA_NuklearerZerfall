@@ -20,9 +20,15 @@ public class MainApp extends Application {
         launch(args);
     }
 
+    /**
+     * Start Fx application
+     * @param stage
+     * @throws Exception
+     */
     public void start(Stage stage) throws Exception {
         log.info("Starting radioactive decay calculator");
 
+        //load and create main window
         String fxmlFile = "/fxml/MainWindow.fxml";
         log.debug("Loading FXML for main view from: {}", fxmlFile);
         FXMLLoader loader = new FXMLLoader();
