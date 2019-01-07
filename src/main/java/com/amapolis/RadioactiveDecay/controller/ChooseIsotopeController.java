@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import com.amapolis.RadioactiveDecay.model.isotope.Isotope;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -56,15 +57,30 @@ public class ChooseIsotopeController implements Initializable {
 
         System.out.println("done");
     }
-    */
-    
+     */
     @FXML
     private void selectIsotope(ActionEvent ae) {
-        Isotope selectedIsotope = optionTable.getSelectionModel().getSelectedItem();
-        double amount = Double.parseDouble(amountField.getText());
-        mainWindowController.addIsotopeToTable(selectedIsotope, amount);
-        System.out.println(amount + " atoms of the isotope " + selectedIsotope.getId() + " selected");
-        ((Stage) optionTable.getScene().getWindow()).close();
+        double amount = 0;
+        try {
+            amount = Double.parseDouble(amountField.getText());
+        } catch (Exception e) {
+        }
+        if (amountField.getText() != "") {
+            if (amount > 0) {
+                Isotope selectedIsotope = optionTable.getSelectionModel().getSelectedItem();
+                if (selectedIsotope != null) {
+                    mainWindowController.addIsotopeToTable(selectedIsotope, amount);
+                    System.out.println(amount + " atoms of the isotope " + selectedIsotope.getId() + " selected");
+                    ((Stage) optionTable.getScene().getWindow()).close();
+                } else {
+                    showAlert("invalid isotope", "An isotope has to be selected.");
+                }
+            } else {
+                showAlert("invalid amount", "The amount of isotopes should be greater than 0.");
+            }
+        } else {
+            showAlert("invalid amount", "The amount of isotopes should be greater than 0.");
+        }
     }
 
     @FXML
@@ -83,7 +99,7 @@ public class ChooseIsotopeController implements Initializable {
         ArrayList<Isotope> optionList = new ArrayList<>();
         if (inputString.toLowerCase().contains("-")) {
             String[] inputs = inputString.toLowerCase().split("-");
-            String isotopeName = inputs[0].toLowerCase();           
+            String isotopeName = inputs[0].toLowerCase();
             if (inputs.length > 1) {
                 String isotopeNumber = "";
                 isotopeNumber = inputs[1].toLowerCase();
@@ -92,13 +108,13 @@ public class ChooseIsotopeController implements Initializable {
                         optionList.add(isotope);
                     }
                 }
-            }else{
-               for (Isotope isotope : isotopeSet) {
+            } else {
+                for (Isotope isotope : isotopeSet) {
                     if (isotope.getId().toLowerCase().contains(isotopeName) || isotope.getElementName().toLowerCase().contains(isotopeName)) {
                         optionList.add(isotope);
                     }
-                } 
-            }               
+                }
+            }
         } else {
             for (Isotope isotope : isotopeSet) {
                 if (isotope.getId().toLowerCase().contains(inputString.toLowerCase()) || isotope.getElementName().toLowerCase().contains(inputString.toLowerCase())) {
@@ -128,6 +144,14 @@ public class ChooseIsotopeController implements Initializable {
             }
         }
         return topOption;
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error!");
+        alert.setHeaderText(title);
+        alert.setContentText(message);
+        alert.show();
     }
 
     public void setMainWindowController(MainWindowController mainWindowController) {
