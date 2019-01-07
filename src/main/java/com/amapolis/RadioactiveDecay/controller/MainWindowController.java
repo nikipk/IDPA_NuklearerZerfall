@@ -117,13 +117,41 @@ public class MainWindowController implements Initializable {
         resetBackgroundThread();
         try {
             DecayCalculator decayCalculator = new DecayCalculator();
-            decayCalculator.setZeroTolerance(Double.parseDouble(zeroTolerance.getText()));
 
+            //todo copy errorhandling for approach
+            double zeroToleranceValue;
+            try {
+                zeroToleranceValue = Double.parseDouble(zeroTolerance.getText());
+            } catch (NumberFormatException nfx){
+                showAlert("Zero tolerance value error", "The value in the zero tolerance field couldn't be parsed into a number.");
+                return;
+            }
+            decayCalculator.setZeroTolerance(zeroToleranceValue);
+
+            //atomic Objects because they are used in other threads => threadsafe
             //get declared precision level //todo can maybe be shorted
-            final AtomicInteger precision = new AtomicInteger(Integer.parseInt(precisionLevel.getText()));
+            final AtomicInteger precision;
+            try {
+                precision = new AtomicInteger(Integer.parseInt(precisionLevel.getText()));
+            }catch (NumberFormatException nfe){
+                showAlert("Precision level error", "The value in the precision field couldn't be parsed into a number.");
+                return;
+            }
             //get declared timeout between timestep
-            final AtomicInteger timeStepInMs = new AtomicInteger(Integer.parseInt(timeoutInMs.getText()));
-            final AtomicInteger timeStepInNs = new AtomicInteger(Integer.parseInt(timeoutInNs.getText()));
+            final AtomicInteger timeStepInMs;
+            final AtomicInteger timeStepInNs;
+            try {
+                timeStepInMs = new AtomicInteger(Integer.parseInt(timeoutInMs.getText()));
+                timeStepInNs = new AtomicInteger(Integer.parseInt(timeoutInNs.getText()));
+            } catch (NumberFormatException nfe){
+                showAlert("Time step error", "The value in the time step field couldn't be parsed into a number.");
+                return;
+            }
+
+            if(timeStepInMs.doubleValue() + timeStepInNs.doubleValue()/1000 < 0.1){
+                showAlert("Time step error", "The value for the time step must at least be 100ns or displaying issues might occur.");
+                return;
+            }
 
             //converts the table isotope element to a map
             Map<Isotope, Double> initialIsotope = tableElementsToMap(isotopesInTable);
@@ -147,8 +175,7 @@ public class MainWindowController implements Initializable {
                             TimeIsotope isotope = new TimeIsotope(time, isotopes);
                             updateValue(isotope);
                             try {
-                                //todo timeout in ns not sure if this works
-                                //todo mesure time and set difference as timestep
+                                //todo optional measure time and set difference as timestep
                                 Thread.sleep(timeStepInMs.get(), timeStepInNs.get());
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
@@ -169,7 +196,7 @@ public class MainWindowController implements Initializable {
             setUpdateListenerTimeLineChart(isotopeSeries, backgroundTask);
         } catch (InvalidIsotopeException e) {
             e.printStackTrace();
-            //todo error handling
+            showAlert("Invalid isotope exception", "An invalid isotope was detected. Try again or choose an other isotope.");
         }
     }
 
@@ -210,7 +237,6 @@ public class MainWindowController implements Initializable {
                             TimeIsotope isotope = new TimeIsotope(time, isotopes);
                             updateValue(isotope);
                             try {
-                                //todo timeout in ns not sure if this works
                                 Thread.sleep(timeStepInMs.get(), timeStepInNs.get());
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
@@ -234,7 +260,7 @@ public class MainWindowController implements Initializable {
             setUpdateListenerTimeLineChart(isotopeSeries, backgroundTask);
         } catch (InvalidIsotopeException e) {
             e.printStackTrace();
-            //todo error handling
+            showAlert("Invalid isotope exception", "An invalid isotope was detected. Try again or choose an other isotope.");
         }
     }
 
@@ -259,7 +285,6 @@ public class MainWindowController implements Initializable {
         log.info("ClearGraph button clicked!");
         resetBackgroundThread();
         //todo maybe better method
-        //todo cancle running threads
         lineChart.getData().clear();
         resetBarChart();
     }
@@ -303,7 +328,9 @@ public class MainWindowController implements Initializable {
     }
 
     private void showAlert(String title, String message) {
+        log.error("An error message was shown, \"" + title + "\", \"" + message + "\"");
         Alert alert = new Alert(Alert.AlertType.ERROR);
+        ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("/images/logo.png"));
         alert.setTitle("Error!");
         alert.setHeaderText(title);
         alert.setContentText(message);
