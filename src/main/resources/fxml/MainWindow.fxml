@@ -55,7 +55,7 @@
                 <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
             </BorderPane.margin>
             <children>
-                <TableView fx:id="isotopeTable" editable="true" prefHeight="200.0" prefWidth="200.0">
+                <TableView fx:id="isotopeTable" editable="true">
                     <columns>
                         <TableColumn fx:id="idCol" editable="false" prefWidth="70.0" text="ID" />
                         <TableColumn fx:id="elementNameCol" editable="false" prefWidth="180.0" text="Element name" />
@@ -70,7 +70,7 @@
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                     </columnResizePolicy>
                 </TableView>
-                <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
+                <HBox alignment="CENTER_RIGHT">
                     <children>
                         <Button mnemonicParsing="false" onAction="#handleButtonAdd" text="Add Isotope">
                             <HBox.margin>
@@ -84,7 +84,7 @@
                         </Button>
                     </children>
                 </HBox>
-                <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
+                <HBox alignment="CENTER_RIGHT" prefWidth="200.0">
                     <children>
                         <Label text="Precision level:">
                             <HBox.margin>
@@ -125,7 +125,7 @@
                         </TextField>
                     </children>
                 </HBox>
-                <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
+                <HBox alignment="CENTER_RIGHT">
                     <children>
                         <CheckBox fx:id="animated" mnemonicParsing="false" text="Animated">
                             <HBox.margin>
@@ -150,7 +150,7 @@
                         </TextField>
                     </children>
                 </HBox>
-                <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
+                <HBox alignment="CENTER_RIGHT">
                     <children>
                         <Button mnemonicParsing="false" onAction="#handleButtonCalculateExact" text="Calculate decay exact">
                             <HBox.margin>
@@ -190,7 +190,7 @@
         </VBox>
     </center>
     <right>
-        <BarChart fx:id="barChart" prefHeight="339.0" prefWidth="435.0" title="Amount isotopes at given time" BorderPane.alignment="CENTER">
+        <BarChart fx:id="barChart" title="Amount isotopes at given time" BorderPane.alignment="CENTER">
             <xAxis>
                 <CategoryAxis label="Isotopes" side="BOTTOM" />
             </xAxis>
