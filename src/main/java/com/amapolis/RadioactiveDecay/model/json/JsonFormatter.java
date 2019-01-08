@@ -8,9 +8,7 @@ package com.amapolis.RadioactiveDecay.model.json;
 import com.amapolis.RadioactiveDecay.model.isotope.DecayType;
 import com.amapolis.RadioactiveDecay.model.isotope.Isotope;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -48,7 +46,6 @@ public class JsonFormatter {
     private void scanOldJson() {
         JSONParser parser = new JSONParser();
         try {
-            //todo maybe use getClass().getResourceAsStream(FILE)
             Object rootObject = parser.parse(new FileReader("src/main/resources/json/oldIsotopes.json"));
             JSONObject root = (JSONObject) rootObject;
 
@@ -222,8 +219,8 @@ public class JsonFormatter {
     private void scanJson() {
         JSONParser parser = new JSONParser();
         try {
-            //todo maybe use getClass().getResourceAsStream(fxmlFile)
-            Object rootObject = parser.parse(new FileReader("src/main/resources/json/newIsotopes.json"));
+            Object rootObject = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/json/newIsotopes.json")));
+            //Object rootObject = parser.parse(new FileReader("src/main/resources/json/newIsotopes.json"));
             JSONObject root = (JSONObject) rootObject;
             JSONArray isotopeArray = (JSONArray) root.get("isotopes");
             JSONArray nameArray = (JSONArray) root.get("elementnames");
