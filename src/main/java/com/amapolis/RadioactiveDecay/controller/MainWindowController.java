@@ -13,6 +13,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -22,8 +23,12 @@ import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.gillius.jfxutils.chart.ChartPanManager;
+import org.gillius.jfxutils.chart.JFXChartUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -356,11 +361,12 @@ public class MainWindowController implements Initializable {
      * @param isotopeSeries
      */
     private void addIsotopeSeriesToLineGraph(Set<Isotope> allOccurringIsotopes, Map<Isotope, XYChart.Series> isotopeSeries) {
+        lineChart.setAnimated(animated.isSelected());
+
         for (Isotope isotope : allOccurringIsotopes) {
             XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
             series.setName(isotope.getId());
             lineChart.getData().add(series);
-            lineChart.setAnimated(animated.isSelected());
             isotopeSeries.put(isotope, series);
         }
     }
@@ -418,6 +424,33 @@ public class MainWindowController implements Initializable {
         halfLifeCol.setCellValueFactory(new PropertyValueFactory<IsotopeTableElement, Double>("halfTimeInS"));
         amountCol.setCellValueFactory(new PropertyValueFactory<IsotopeTableElement, Double>("amount"));
         decayTypeCol.setCellValueFactory(new PropertyValueFactory<IsotopeTableElement, String>("decayType"));
+
+        //Setup line chart zooming and moving functionality
+        //from third party library
+        //https://github.com/gillius/jfxutils
+        ChartPanManager panner = new ChartPanManager(lineChart);
+        //Panning works via either secondary (right) mouse or primary with ctrl held down
+        panner.setMouseFilter(mouseEvent -> {
+            if ( mouseEvent.getButton() == MouseButton.SECONDARY ||
+                    ( mouseEvent.getButton() == MouseButton.PRIMARY &&
+                            mouseEvent.isShortcutDown() ) ) {
+                //let it through
+            } else {
+                mouseEvent.consume();
+            }
+        });
+        panner.start();
+
+        //Zooming works only via primary mouse button without ctrl held down
+        JFXChartUtil.setupZooming( lineChart, mouseEvent -> {
+            if ( mouseEvent.getButton() != MouseButton.PRIMARY ||
+                    mouseEvent.isShortcutDown() )
+                mouseEvent.consume();
+        });
+
+        //Reset line chart on double click
+        JFXChartUtil.addDoublePrimaryClickAutoRangeHandler( lineChart );
+
 
         //make tooltips appear faster
         hackTooltipStartTiming();

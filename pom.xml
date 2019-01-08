@@ -55,6 +55,11 @@
 
 
     <dependencies>
+        <dependency>
+            <groupId>org.gillius</groupId>
+            <artifactId>jfxutils</artifactId>
+            <version>1.0</version>
+        </dependency>
     
         <!-- MigLayout -->
 

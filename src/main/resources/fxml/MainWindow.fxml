@@ -18,175 +18,185 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="814.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.amapolis.RadioactiveDecay.controller.MainWindowController">
-   <top>
-      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Radioactive decay calculator" BorderPane.alignment="CENTER">
-         <font>
-            <Font size="42.0" />
-         </font>
-         <BorderPane.margin>
-            <Insets top="5.0" />
-         </BorderPane.margin>
-      </Text>
-   </top>
-   <bottom>
-      <LineChart fx:id="lineChart" prefWidth="899.0" title="Isotope decay" BorderPane.alignment="CENTER">
-        <xAxis>
-          <NumberAxis fx:id="yAxis" label="Time in seconds" side="BOTTOM" />
-        </xAxis>
-        <yAxis>
-          <NumberAxis label="Amount isotopes" side="LEFT" fx:id="xAxis" />
-        </yAxis>
-      </LineChart>
-   </bottom>
-   <center>
-      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
-         <BorderPane.margin>
-            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-         </BorderPane.margin>
-         <children>
-            <TableView fx:id="isotopeTable" editable="true" prefHeight="200.0" prefWidth="200.0">
-              <columns>
-                <TableColumn fx:id="idCol" editable="false" prefWidth="70.0" text="ID" />
-                <TableColumn fx:id="elementNameCol" editable="false" prefWidth="180.0" text="Element name" />
-                  <TableColumn fx:id="electronsProtonsCol" editable="false" prefWidth="135.0" text="Electrons/Protons" />
-                  <TableColumn fx:id="neutronsCol" editable="false" minWidth="0.0" text="Neutrons" />
-                  <TableColumn fx:id="massCol" editable="false" prefWidth="65.0" text="Mass" />
-                  <TableColumn fx:id="decayTypeCol" editable="false" prefWidth="75.0" text="Decay type" />
-                  <TableColumn fx:id="halfLifeCol" editable="false" prefWidth="75.0" text="Half life in s" />
-                  <TableColumn fx:id="amountCol" editable="false" prefWidth="75.0" text="Amount" />
-              </columns>
-               <columnResizePolicy>
-                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-               </columnResizePolicy>
-            </TableView>
-            <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
-               <children>
-                  <Button mnemonicParsing="false" onAction="#handleButtonAdd" text="Add Isotope">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                  </Button>
-                  <Button mnemonicParsing="false" onAction="#handleButtonDelete" text="Delete Isotope">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                  </Button>
-               </children>
-            </HBox>
-            <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
-               <children>
-                  <Label text="Precision level:">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                     <tooltip>
-                        <Tooltip prefWidth="200.0" text="This value influences how many timesteps the algorithm will make. One timestep is always the shortest isotope half-life divided by the precision level. Higher is slower but more accurate. Lower is faster but more inaccurate" wrapText="true" />
-                     </tooltip>
-                  </Label>
-                  <TextField fx:id="precisionLevel" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="80.0" text="30">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                  </TextField>
-                  <Label text="Timeout between timestep:">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                     <tooltip>
-                        <Tooltip prefWidth="200.0" text="Must be at least 100ns! Values below the minimum may cause displaying issues. This value controls the delay of each calculation operation. This does influence the rate of data displayed in the graph. Higher means the graph is built up slowly. Lower means the graph is built up quicker." wrapText="true" />
-                     </tooltip>
-                  </Label>
-                  <Label text="Ms:" />
-                  <TextField fx:id="timeoutInMs" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="80.0" text="10">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                  </TextField>
-                  <Label text="ns:">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                  </Label>
-                  <TextField fx:id="timeoutInNs" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="80.0" text="0">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                  </TextField>
-               </children>
-            </HBox>
-            <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
-               <children>
-                  <CheckBox fx:id="animated" mnemonicParsing="false" text="Animated">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                     <tooltip>
-                        <Tooltip prefWidth="200.0" text="Enable the animation for the line chart. The values are being displayed smoother but the numbers on the graph are not visible." wrapText="true" />
-                     </tooltip>
-                  </CheckBox>
-                  <Label text="Zero tolerance:">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                     <tooltip>
-                        <Tooltip prefWidth="200.0" text="Must be over 0. This option decides which amount of isotopes is considered as 0. This is because no amount of isotopes can reach 0 due to the exponential calculation. " wrapText="true" />
-                     </tooltip>
-                  </Label>
-                  <TextField fx:id="zeroTolerance" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="80.0" text="0.5">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                  </TextField>
-               </children>
-            </HBox>
-            <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
-               <children>
-                  <Button mnemonicParsing="false" onAction="#handleButtonCalculateExact" text="Calculate decay exact">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                     <tooltip>
-                        <Tooltip prefWidth="200.0" text="Calculates the exact amount of isotopes at a given time. Is generally slower than the approach method but more accurate." wrapText="true" />
-                     </tooltip>
-                  </Button>
-                  <Button mnemonicParsing="false" onAction="#handleButtonCalculateApproach" text="Calculate decay approach">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                     <tooltip>
-                        <Tooltip prefWidth="200.0" text="Calculates an approach amount of isotopes at a given time. Is generally faster than the exact method but less accurate." wrapText="true" />
-                     </tooltip>
-                  </Button>
-                  <Button mnemonicParsing="false" onAction="#handleButtonPause" text="Pause/Continue">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                     <tooltip>
-                        <Tooltip prefWidth="200.0" text="Pause or continue the ongoing calculation." wrapText="true" />
-                     </tooltip>
-                  </Button>
-                  <Button mnemonicParsing="false" onAction="#handleButtonClearGraph" text="Clear graphs">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                     <tooltip>
-                        <Tooltip prefWidth="200.0" text="Stops all calculations and clears the graphs." wrapText="true" />
-                     </tooltip>
-                  </Button>
-               </children>
-            </HBox>
-         </children>
-      </VBox>
-   </center>
-   <right>
-      <BarChart fx:id="barChart" prefHeight="339.0" prefWidth="435.0" title="Amount isotopes at given time" BorderPane.alignment="CENTER">
-        <xAxis>
-          <CategoryAxis label="Isotopes" side="BOTTOM" />
-        </xAxis>
-        <yAxis>
-          <NumberAxis label="Amount isotopes" side="LEFT" />
-        </yAxis>
-      </BarChart>
-   </right>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="840.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.amapolis.RadioactiveDecay.controller.MainWindowController">
+    <top>
+        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Radioactive decay calculator" BorderPane.alignment="CENTER">
+            <font>
+                <Font size="42.0" />
+            </font>
+            <BorderPane.margin>
+                <Insets top="5.0" />
+            </BorderPane.margin>
+        </Text>
+    </top>
+    <bottom>
+        <VBox alignment="TOP_CENTER">
+            <LineChart fx:id="lineChart" title="Isotope decay" BorderPane.alignment="CENTER">
+                <xAxis>
+                    <NumberAxis fx:id="yAxis" animated="false" label="Time in seconds" prefHeight="36.0" prefWidth="1122.0" side="BOTTOM" />
+                </xAxis>
+                <yAxis>
+                    <NumberAxis animated="false" label="Amount isotopes" prefHeight="317.0" prefWidth="42.0" side="LEFT" fx:id="xAxis" />
+                </yAxis>
+            </LineChart>
+         <Label text="Line chart actions: Drag mouse with the right button pressed to navigate; use the mouse-wheel to zoom; press left mouse button and draw a rectangle from the top right to the bottom left to specify an area; double click to reset line chart." textAlignment="CENTER" wrapText="true">
+            <VBox.margin>
+               <Insets bottom="10.0" left="100.0" right="100.0" />
+            </VBox.margin>
+            <padding>
+               <Insets left="100.0" right="100.0" />
+            </padding>
+         </Label>
+        </VBox>
+    </bottom>
+    <center>
+        <VBox BorderPane.alignment="CENTER">
+            <BorderPane.margin>
+                <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+            </BorderPane.margin>
+            <children>
+                <TableView fx:id="isotopeTable" editable="true" prefHeight="200.0" prefWidth="200.0">
+                    <columns>
+                        <TableColumn fx:id="idCol" editable="false" prefWidth="70.0" text="ID" />
+                        <TableColumn fx:id="elementNameCol" editable="false" prefWidth="180.0" text="Element name" />
+                        <TableColumn fx:id="electronsProtonsCol" editable="false" prefWidth="135.0" text="Electrons/Protons" />
+                        <TableColumn fx:id="neutronsCol" editable="false" minWidth="0.0" text="Neutrons" />
+                        <TableColumn fx:id="massCol" editable="false" prefWidth="65.0" text="Mass" />
+                        <TableColumn fx:id="decayTypeCol" editable="false" prefWidth="75.0" text="Decay type" />
+                        <TableColumn fx:id="halfLifeCol" editable="false" prefWidth="75.0" text="Half life in s" />
+                        <TableColumn fx:id="amountCol" editable="false" prefWidth="75.0" text="Amount" />
+                    </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                    </columnResizePolicy>
+                </TableView>
+                <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                        <Button mnemonicParsing="false" onAction="#handleButtonAdd" text="Add Isotope">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                        </Button>
+                        <Button mnemonicParsing="false" onAction="#handleButtonDelete" text="Delete Isotope">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                        </Button>
+                    </children>
+                </HBox>
+                <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                        <Label text="Precision level:">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                            <tooltip>
+                                <Tooltip prefWidth="200.0" text="This value influences how many timesteps the algorithm will make. One timestep is always the shortest isotope half-life divided by the precision level. Higher is slower but more accurate. Lower is faster but more inaccurate" wrapText="true" />
+                            </tooltip>
+                        </Label>
+                        <TextField fx:id="precisionLevel" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="80.0" text="30">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                        </TextField>
+                        <Label text="Timeout between timestep:">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                            <tooltip>
+                                <Tooltip prefWidth="200.0" text="Must be at least 100ns! Values below the minimum may cause displaying issues. This value controls the delay of each calculation operation. This does influence the rate of data displayed in the graph. Higher means the graph is built up slowly. Lower means the graph is built up quicker." wrapText="true" />
+                            </tooltip>
+                        </Label>
+                        <Label text="Ms:" />
+                        <TextField fx:id="timeoutInMs" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="80.0" text="10">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                        </TextField>
+                        <Label text="ns:">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                        </Label>
+                        <TextField fx:id="timeoutInNs" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="80.0" text="0">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                        </TextField>
+                    </children>
+                </HBox>
+                <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                        <CheckBox fx:id="animated" mnemonicParsing="false" text="Animated">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                            <tooltip>
+                                <Tooltip prefWidth="200.0" text="Enable the animation for the line chart. The values are being displayed smoother but the numbers on the graph are not visible." wrapText="true" />
+                            </tooltip>
+                        </CheckBox>
+                        <Label text="Zero tolerance:">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                            <tooltip>
+                                <Tooltip prefWidth="200.0" text="Must be over 0. This option decides which amount of isotopes is considered as 0. This is because no amount of isotopes can reach 0 due to the exponential calculation. " wrapText="true" />
+                            </tooltip>
+                        </Label>
+                        <TextField fx:id="zeroTolerance" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="80.0" text="0.5">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                        </TextField>
+                    </children>
+                </HBox>
+                <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                        <Button mnemonicParsing="false" onAction="#handleButtonCalculateExact" text="Calculate decay exact">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                            <tooltip>
+                                <Tooltip prefWidth="200.0" text="Calculates the exact amount of isotopes at a given time. Is generally slower than the approach method but more accurate." wrapText="true" />
+                            </tooltip>
+                        </Button>
+                        <Button mnemonicParsing="false" onAction="#handleButtonCalculateApproach" text="Calculate decay approach">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                            <tooltip>
+                                <Tooltip prefWidth="200.0" text="Calculates an approach amount of isotopes at a given time. Is generally faster than the exact method but less accurate." wrapText="true" />
+                            </tooltip>
+                        </Button>
+                        <Button mnemonicParsing="false" onAction="#handleButtonPause" text="Pause/Continue">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                            <tooltip>
+                                <Tooltip prefWidth="200.0" text="Pause or continue the ongoing calculation." wrapText="true" />
+                            </tooltip>
+                        </Button>
+                        <Button mnemonicParsing="false" onAction="#handleButtonClearGraph" text="Clear graphs">
+                            <HBox.margin>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </HBox.margin>
+                            <tooltip>
+                                <Tooltip prefWidth="200.0" text="Stops all calculations and clears the graphs." wrapText="true" />
+                            </tooltip>
+                        </Button>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </center>
+    <right>
+        <BarChart fx:id="barChart" prefHeight="339.0" prefWidth="435.0" title="Amount isotopes at given time" BorderPane.alignment="CENTER">
+            <xAxis>
+                <CategoryAxis label="Isotopes" side="BOTTOM" />
+            </xAxis>
+            <yAxis>
+                <NumberAxis label="Amount isotopes" side="LEFT" />
+            </yAxis>
+        </BarChart>
+    </right>
 </BorderPane>
