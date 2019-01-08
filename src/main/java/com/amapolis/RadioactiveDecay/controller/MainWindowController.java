@@ -451,7 +451,7 @@ public class MainWindowController implements Initializable {
      * This method converts isotope table elements from the tableView to a Map.
      * The map only contains each isotope once and adds up the amount-values.
      * @param isotopeTableElements
-     * @return
+     * @return Map<Isotope, Double>
      */
     private Map<Isotope, Double> tableElementsToMap(Collection<IsotopeTableElement> isotopeTableElements) {
         Map<Isotope, Double> returnMap = new LinkedHashMap<>();
