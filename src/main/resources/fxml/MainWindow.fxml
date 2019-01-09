@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
@@ -18,7 +24,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="840.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.amapolis.RadioactiveDecay.controller.MainWindowController">
+<BorderPane maxHeight="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="1300.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.amapolis.RadioactiveDecay.controller.MainWindowController">
     <top>
         <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Radioactive decay calculator" BorderPane.alignment="CENTER">
             <font>
@@ -31,22 +37,24 @@
     </top>
     <bottom>
         <VBox alignment="TOP_CENTER">
-            <LineChart fx:id="lineChart" title="Isotope decay" BorderPane.alignment="CENTER">
-                <xAxis>
-                    <NumberAxis fx:id="yAxis" animated="false" label="Time in seconds" prefHeight="36.0" prefWidth="1122.0" side="BOTTOM" />
-                </xAxis>
-                <yAxis>
-                    <NumberAxis animated="false" label="Amount isotopes" prefHeight="317.0" prefWidth="42.0" side="LEFT" fx:id="xAxis" />
-                </yAxis>
-            </LineChart>
-         <Label text="Line chart actions: Drag mouse with the right button pressed to navigate; use the mouse-wheel to zoom; press left mouse button and draw a rectangle from the top right to the bottom left to specify an area; double click to reset line chart." textAlignment="CENTER" wrapText="true">
-            <VBox.margin>
-               <Insets bottom="10.0" left="100.0" right="100.0" />
-            </VBox.margin>
-            <padding>
-               <Insets left="100.0" right="100.0" />
-            </padding>
-         </Label>
+           <children>
+               <LineChart fx:id="lineChart" title="Isotope decay" BorderPane.alignment="CENTER">
+                   <xAxis>
+                       <NumberAxis fx:id="yAxis" animated="false" label="Time in seconds" prefHeight="36.0" prefWidth="1122.0" side="BOTTOM" />
+                   </xAxis>
+                   <yAxis>
+                       <NumberAxis animated="false" label="Amount isotopes" prefHeight="317.0" prefWidth="42.0" side="LEFT" fx:id="xAxis" />
+                   </yAxis>
+               </LineChart>
+            <Label text="Line chart actions: Drag mouse with the right button pressed to navigate; use the mouse-wheel to zoom; press left mouse button and draw a rectangle from the top right to the bottom left to specify an area; double click to reset line chart." textAlignment="CENTER" wrapText="true">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="100.0" right="100.0" />
+               </VBox.margin>
+               <padding>
+                  <Insets left="100.0" right="100.0" />
+               </padding>
+            </Label>
+           </children>
         </VBox>
     </bottom>
     <center>
