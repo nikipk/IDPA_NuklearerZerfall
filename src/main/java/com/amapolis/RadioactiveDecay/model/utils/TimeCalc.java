@@ -20,6 +20,6 @@ public class TimeCalc {
         double milliseconds = (seconds % 1 * 1000);
         int nanoseconds = (int) (milliseconds%1 *1000);
 
-        return (int) years  + "y " + (int) days + "d " + (int) hours + "h " + (int) minutes + "min " + (int) seconds + "s " + (int) milliseconds + "ms " + nanoseconds + "ns";
+        return (int) years  + "y " + (int) days + "d " + (int) hours + "h " + (int) minutes + "min " + (int) seconds + "s " + (int) milliseconds + "ms " + nanoseconds + "µs";
     }
 }
